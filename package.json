@@ -3,12 +3,13 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "svelte-kit dev",
-    "build": "svelte-kit build",
+    "build": "npm run vercelbuld && svelte-kit build",
     "package": "svelte-kit package",
     "preview": "svelte-kit preview",
     "reload": "npm run build && npm run preview",
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json",
+    "vercelbuild": "yarn global add node-gyp-build",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "devDependencies": {

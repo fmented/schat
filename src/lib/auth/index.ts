@@ -1,6 +1,6 @@
 import cookie from "cookie"
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import {open, close} from 'model'
 import type {JwtPayload} from 'jsonwebtoken'
 import type {Profile} from 'interfaces'

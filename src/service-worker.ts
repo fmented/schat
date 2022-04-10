@@ -70,6 +70,7 @@ s.on('message_received', async msg=>{
 
 s.on('message_new', async msg=>{
     if(!db) return
+    await db.open()
     const profileExists = await db.tables.profile.findOne({username:msg.from})
     if(!profileExists){
         const res = await (await sendRequest(API_URL.AUTH_DETAIL, {username:msg.from})).json()

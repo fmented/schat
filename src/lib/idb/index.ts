@@ -477,9 +477,7 @@ export class Database<T>{
 
   async open():Promise<void>{
     if(this.#db) return
-    const dbs = (await indexedDB.databases()).map(d=>d.name)
     return new Promise((resolve, reject) =>{
-      if(!dbs.includes(this.#name)){
         const request = indexedDB.open(this.#name)
         request.onupgradeneeded = () => {
           const db = request.result
@@ -489,23 +487,16 @@ export class Database<T>{
                 obj.createIndex(col.name as unknown as string, col.name as unknown as string, col.unique? {unique:true}: {})
               }
           }
-          this.#db = db
-          resolve()
         }
 
         request.onerror = e=> reject(e)
-      }
-
-      else{
-          const request = indexedDB.open(this.#name)
+      
           request.onsuccess = () => {
             this.#db = request.result
             resolve()
           }
     
-          request.onerror = e => reject(e)
-      }
-      
+          request.onerror = e => reject(e)      
 
     })
   }

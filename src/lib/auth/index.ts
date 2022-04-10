@@ -32,7 +32,7 @@ export async function subscribe(sub:SubscribtionSchemaType){
 
 export async function unsubscribe(u:{deviceId:string}){
     const db= await open()
-    await db.Subscribtion.findOneAndDelete(u)
+    await db.Subscribtion.deleteOne({deviceId:u.deviceId})
     await close()
 }
 

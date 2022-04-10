@@ -11,7 +11,6 @@ let s:SWCType
 let message:string = ''
 
 onMount(()=>{
-
     s= new SWContainerBridge(navigator.serviceWorker)
 })
 
@@ -45,7 +44,7 @@ async function onClick(){
         s.emit('after_login', subscribtion)
         s.on('subscribed', s =>{
             localStorage.setItem('deviceId', s)
-            window.location.href = '/chat'       
+            window.location.reload()       
         })
 
     }
@@ -62,7 +61,7 @@ async function onClick(){
     <label for="password">Password</label>
     <input type="password" id="password" bind:value="{password}">
     
-    <button on:click={onClick} disabled={process}>Login</button>
+    <button on:click|preventDefault={onClick} disabled={process}>Login</button>
 </div>
 
 <style>

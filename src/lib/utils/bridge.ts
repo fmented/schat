@@ -13,20 +13,24 @@ export class SWBridge{
 
     on<P extends keyof SWEventMap>(ev:P, cb:Callback<SWEventMap[P]>){
         this.#sw.addEventListener('message', (e:MessageEvent)=>{
-
+            if(!e.data) return
             const data = e.data.data as SWEventMap[P]
             const event = e.data.event as P
+            if(!event) return
             if(ev===event){
                 return cb(data)
             }
         })
 
         this.#sw.addEventListener('push', async (e:PushEvent)=>{
+            if(!e.data) return
             const d = await e.data.json()
             const data = d.data as SWEventMap[P]
             const event = d.event as P
+            console.log(event);
+            if(!event) return
             if(ev===event){
-                return cb(data)
+                return e.waitUntil(cb(data))
             }
         })
     }

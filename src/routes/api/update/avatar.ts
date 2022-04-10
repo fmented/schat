@@ -9,16 +9,19 @@ export const post:RequestHandler= async function ({request}) {
     if(!auth) return {status:403};
     const user = await getCurrentUser(request)
     await updateProfile(user, body.content, 'avatar')
-    body.receiver.forEach(async u=>{
+    const plist = body.receiver.map(async u=>{
         const list = await getSubscribtionList(u)
-        list.forEach(async s=>{
+        
+        list.map(async s=>{
             try {
                 await sendPush(s, {event:'avatar_update', data:{username:user, avatar:body.content}})
             } catch (error) {
                 return
             }
         })
+        
     })
 
+    await Promise.all(plist)
     return {}
 }

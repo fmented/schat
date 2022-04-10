@@ -15,7 +15,7 @@ let currentUser:string
 const tags = new Set()
 const s = new SWBridge(sw)
 
-async function initDB() {
+function initDB() {
     db = new Database<{chat:Chat, profile:Profile}>(currentUser, {
         chat: [
             {name:'from'},
@@ -35,6 +35,7 @@ async function initDB() {
 
 s.on('after_login', async data=>{
     currentUser = data.username
+    initDB()
     const deviceId = uuid()
     try {
         await sendRequest(API_URL.AUTH_SUBSCRIBE, {...data, deviceId})
@@ -44,9 +45,9 @@ s.on('after_login', async data=>{
     }
 })
 
-s.on('open',async s=>{
+s.on('open', s=>{
     currentUser = s
-    await initDB()
+    initDB()
 })
 
 
@@ -65,7 +66,7 @@ s.on('message_received', async msg=>{
     const m = await db.tables.chat.findOne({id:msg.id})
     await m.update({status:'received'})
     await db.close()
-    await s.emit('update', m.from===db.name?m.to:m.from)
+    await s.emit('update', m.from===currentUser?m.to:m.from)
 })
 
 
@@ -83,7 +84,7 @@ s.on('message_new', async msg=>{
     await sendRequest(API_URL.MESSAGE_RECEIVED, {id:msg.to, receiver:msg.from})
     await db.close()
     if(!tags.has(msg.from)) tags.add(msg.from)
-    sw.registration.showNotification(msg.from, {tag:msg.from, icon:profileExists.avatar, data:msg.content})
+    sw.registration.showNotification(msg.from, {tag:msg.from, icon:profileExists.avatar, body:msg.content})
     sw.addEventListener('notificationclick', e=>{
         tags.delete(e.notification.tag)
     })

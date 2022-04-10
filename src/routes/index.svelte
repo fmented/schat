@@ -35,5 +35,5 @@ import { onMount } from 'svelte';
         form='login'
         }}/>
     {:else}
-    <LoginForm on:fail={()=>forceToLogin=true}/>
+    <LoginForm on:loggedin={()=>window.location.reload()}/>
 {/if}

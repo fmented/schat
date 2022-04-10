@@ -1,15 +1,14 @@
 <script lang="ts" type="svelte-data">
 import { sendRequest, SWContainerBridge } from "utils";
 import type { SWContainerBridge as SWCType } from "utils";
-import { onMount} from 'svelte';
+import { onMount, createEventDispatcher} from 'svelte';
 import {PUBLIC_KEY} from '$lib/secrets'
 import {API_URL} from 'interfaces'
-import { goto } from "$app/navigation";
 let username=''
 let password=''
 let s:SWCType
 let message:string = ''
-
+const d = createEventDispatcher()
 onMount(()=>{
     s= new SWContainerBridge(navigator.serviceWorker)
 })
@@ -31,7 +30,6 @@ async function onClick(){
         }
         const sw = await navigator.serviceWorker.ready
         const sub = await sw.pushManager.subscribe({
-            userVisibleOnly:true,
             applicationServerKey:PUBLIC_KEY
         })
         const p256dh = sub.toJSON().keys.p256dh
@@ -44,7 +42,7 @@ async function onClick(){
         s.emit('after_login', subscribtion)
         s.on('subscribed', s =>{
             localStorage.setItem('deviceId', s)
-            window.location.reload()       
+            d('loggedin') 
         })
 
     }

@@ -9,9 +9,9 @@ export const post:RequestHandler= async function ({request}) {
     if(!auth) return {status:403};
     const user = await getCurrentUser(request)
     await updateProfile(user, body.content, 'bio')
-    body.receiver.forEach(async u=>{
+    const plist = body.receiver.map(async u=>{
         const list = await getSubscribtionList(u)
-        list.forEach(async s=>{
+        list.map(async s=>{
             try {
                 await sendPush(s, {event:'bio_update', data:{username:user, bio:body.content}})
             } catch (error) {
@@ -19,6 +19,7 @@ export const post:RequestHandler= async function ({request}) {
             }
         })
     })
+    await Promise.all(plist)
 
     return {}
 }

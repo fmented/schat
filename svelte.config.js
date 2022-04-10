@@ -28,7 +28,9 @@ const config = {
           components: path.resolve("src/lib/components"),
         },
       },
-      optimizeDeps: ['uuid']
+      optimizeDeps: {
+        include: ['brcypt', 'uuid']
+      }
 
     },
   },

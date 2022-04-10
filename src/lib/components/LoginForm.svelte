@@ -30,7 +30,8 @@ async function onClick(){
         }
         const sw = await navigator.serviceWorker.ready
         const sub = await sw.pushManager.subscribe({
-            applicationServerKey:PUBLIC_KEY
+            applicationServerKey:PUBLIC_KEY,
+            userVisibleOnly:true
         })
         const p256dh = sub.toJSON().keys.p256dh
         const auth = sub.toJSON().keys.p256dh

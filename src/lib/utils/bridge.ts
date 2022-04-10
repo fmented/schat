@@ -24,10 +24,14 @@ export class SWBridge{
 
         this.#sw.addEventListener('push', async (e:PushEvent)=>{
             if(!e.data) return
-            const d = await e.data.json()
+            let d:{data:any, event:string}
+            try {
+                d = e.data.json()
+            } catch (error) {
+                return
+            }
             const data = d.data as SWEventMap[P]
             const event = d.event as P
-            console.log(event);
             if(!event) return
             if(ev===event){
                 return e.waitUntil(cb(data))

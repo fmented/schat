@@ -12,7 +12,7 @@ const sw = self as unknown as ServiceWorkerGlobalScope
 
 let db:DType<{chat:Chat, profile:Profile}>
 let currentUser:string
-
+const tags = new Set()
 const s = new SWBridge(sw)
 
 async function initDB() {
@@ -68,17 +68,28 @@ s.on('message_received', async msg=>{
     await s.emit('update', m.from===db.name?m.to:m.from)
 })
 
+
+
 s.on('message_new', async msg=>{
     if(!db) return
     await db.open()
-    const profileExists = await db.tables.profile.findOne({username:msg.from})
+    let profileExists = await db.tables.profile.findOne({username:msg.from})
     if(!profileExists){
         const res = await (await sendRequest(API_URL.AUTH_DETAIL, {username:msg.from})).json()
         await db.tables.profile.insertOne({username:msg.from, bio:res.bio, avatar:res.avatar})
+        profileExists = await db.tables.profile.findOne({username:msg.from})
     }
     await db.tables.chat.insertOne({...msg, status:'received'})
     await sendRequest(API_URL.MESSAGE_RECEIVED, {id:msg.to, receiver:msg.from})
     await db.close()
+    if(!tags.has(msg.from)) tags.add(msg.from)
+    sw.registration.showNotification(msg.from, {tag:msg.from, icon:profileExists.avatar, data:msg.content})
+    sw.addEventListener('notificationclick', e=>{
+        tags.delete(e.notification.tag)
+    })
+    sw.addEventListener('notificationclose', e=>{
+        tags.delete(e.notification.tag)
+    })
     await s.emit('update')
 })
 
@@ -120,4 +131,8 @@ s.on('sync', async data=>{
 
 sw.addEventListener('install', ()=>{
     sw.skipWaiting()
+})
+
+sw.addEventListener('push', e=>{
+    console.log(e);
 })

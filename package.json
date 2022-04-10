@@ -9,7 +9,7 @@
     "reload": "npm run build && npm run preview",
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "vercelbuild": "yarn global add node-gyp-build",
+    "vercelbuild": "yarn global add node-pre-gyp",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "devDependencies": {

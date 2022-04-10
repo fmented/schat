@@ -1,0 +1,28 @@
+{
+	"extends": "./.svelte-kit/tsconfig.json",
+	"compilerOptions": {
+		"module": "es2020",
+		"paths": {
+			"$lib": ["src/lib"],
+			"$lib/*": ["src/lib/*"],
+			"auth": [
+				"src/lib/auth"
+			],
+			"model": [
+				"src/lib/model"
+			],
+			"idb": [
+				"src/lib/idb"
+			],
+			"utils": [
+				"src/lib/utils"
+			],
+			"utils/*": [
+				"src/lib/utils/*"
+			],
+			"interfaces": ["src/lib/interfaces"],
+			"components": ["src/lib/components"],
+			"components/*": ["src/lib/components/*"]
+		}
+	}
+}

@@ -82,7 +82,14 @@ s.on('message_new', async msg=>{
     }
     if(!tags.has(msg.from)) tags.add(msg.from)
     await sw.registration.showNotification(msg.from, {tag:msg.from, body:msg.content, icon:profileExists.avatar, image:profileExists.avatar})
-    await db.tables.chat.insertOne({...msg, status:'received'})
+    try {
+        await db.tables.chat.insertOne({...msg, status:'received'})
+    } catch{
+        const m = await db.tables.chat.findOne(msg)
+        if(m){
+            await m.update({status:'received'})
+        }
+    }
     await sendRequest(API_URL.MESSAGE_RECEIVED, {id:msg.to, receiver:msg.from})
     await db.close()
     await s.emit('update')
@@ -90,6 +97,7 @@ s.on('message_new', async msg=>{
 
 
 sw.addEventListener('notificationclick', e=>{
+    e.action
     tags.delete(e.notification.tag)
 })
 sw.addEventListener('notificationclose', e=>{
@@ -135,8 +143,4 @@ s.on('sync', async data=>{
 
 sw.addEventListener('install', ()=>{
     sw.skipWaiting()
-})
-
-sw.addEventListener('push', e=>{
-    console.log(e);
 })

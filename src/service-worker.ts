@@ -143,7 +143,7 @@ s.on('message_received', async msg=>{
     const m = await db.tables.chat.findOne({id:msg.id})
     await m.update({status:'received'})
     await db.close()
-    await s.emit('update', m.from===currentUser?m.to:m.from)
+    return await s.emit('update', m.from===currentUser?m.to:m.from)
 })
 
 s.on('message_new', async msg=>{    
@@ -155,26 +155,23 @@ s.on('message_new', async msg=>{
         await db.tables.profile.insertOne({username:msg.from, bio:res.bio, avatar:res.avatar})
         profileExists = await db.tables.profile.findOne({username:msg.from})
     }
-    if(!tags.has(msg.from)) tags.add(msg.from)
-    await sw.registration.showNotification(msg.from, {
-        tag: msg.from, 
-        body: msg.content, 
-        icon : '/android-chrome-192x192.png', 
-        renotify: false,
-        vibrate: [100, 200, 300, 200, 100, 200, 300],
-        timestamp: msg.timeStamp
-    })
-    // try {
-        await db.tables.chat.insertOne({...msg, status:'received'})
-    // } catch{
-    //     const m = await db.tables.chat.findOne(msg)
-    //     if(m){
-    //         await m.update({status:'received'})
-    //     }
-    // }
+    
+    await db.tables.chat.insertOne({...msg, status:'received'})
     await sendRequest(API_URL.MESSAGE_RECEIVED, {id:msg.to, receiver:msg.from})
     await db.close()
-    await s.emit('update')
+    const _clients = await sw.clients.matchAll()
+    if(_clients.length===0){
+        if(!tags.has(msg.from)) tags.add(msg.from)
+        return sw.registration.showNotification(msg.from, {
+            tag: msg.from, 
+            body: msg.content, 
+            icon : '/android-chrome-192x192.png', 
+            renotify: false,
+            vibrate: [100, 200, 300, 200, 100, 200, 300],
+            timestamp: msg.timeStamp
+        })
+    }
+    else return await s.emit('update')
 })
 
 sw.addEventListener('notificationclick', e=>{
@@ -194,7 +191,7 @@ s.on('bio_update', async u=>{
     const user = await db.tables.profile.findOne({username:u.username})
     await user.update({bio:u.bio})
     await db.close()
-    await s.emit('profile_update', user)
+    return await s.emit('profile_update', user)
 })
 
 s.on('avatar_update', async u=>{
@@ -203,7 +200,7 @@ s.on('avatar_update', async u=>{
     const user = await db.tables.profile.findOne({username:u.username})
     await user.update({avatar:u.avatar})
     await db.close()
-    await s.emit('profile_update', user)
+    return await s.emit('profile_update', user)
 })
 
 s.on('sync', async data=>{

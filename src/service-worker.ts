@@ -156,7 +156,7 @@ s.on('message_new', async msg=>{
         profileExists = await db.tables.profile.findOne({username:msg.from})
     }
 
-    await sendRequest(API_URL.MESSAGE_RECEIVED, {id:msg.to, receiver:msg.from})
+    await sendRequest(API_URL.MESSAGE_RECEIVED, {id:msg.id, receiver:msg.from})
 
     const isExist = await db.tables.chat.findOne(msg)
     if(!isExist) await isExist.update({status:'received'})

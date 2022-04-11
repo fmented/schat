@@ -11,10 +11,9 @@ export const post:RequestHandler= async function ({request}) {
     
     const plist = list.map(async s=>{
         try {
-            await sendPush(s, {event:'message_new', data:body})
-            
+            await sendPush(s, {event:'message_new', data:body})               
         } catch (error) {
-            return
+            console.log(error);
         }
     })
     

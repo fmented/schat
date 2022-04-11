@@ -15,7 +15,7 @@ export const post:RequestHandler= async function ({request}) {
             try {
                 await sendPush(s, {event:'bio_update', data:{username:user, bio:body.content}})
             } catch (error) {
-                return
+                console.log(error);
             }
         })
     })

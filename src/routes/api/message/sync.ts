@@ -12,7 +12,8 @@ export const post:RequestHandler= async function ({request}) {
         try {
             await sendPush(s, {event:'sync', data:body})
         } catch (error) {
-            return
+            console.log(error);
+            
         }
     })
 

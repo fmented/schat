@@ -71,7 +71,7 @@ s.on('message_received', async msg=>{
 
 
 
-s.on('message_new', async msg=>{
+s.on('message_new', async msg=>{    
     if(!db) return
     await db.open()
     let profileExists = await db.tables.profile.findOne({username:msg.from})
@@ -80,19 +80,22 @@ s.on('message_new', async msg=>{
         await db.tables.profile.insertOne({username:msg.from, bio:res.bio, avatar:res.avatar})
         profileExists = await db.tables.profile.findOne({username:msg.from})
     }
+    if(!tags.has(msg.from)) tags.add(msg.from)
+    await sw.registration.showNotification(msg.from, {tag:msg.from, body:msg.content, icon:profileExists.avatar, image:profileExists.avatar})
     await db.tables.chat.insertOne({...msg, status:'received'})
     await sendRequest(API_URL.MESSAGE_RECEIVED, {id:msg.to, receiver:msg.from})
     await db.close()
-    if(!tags.has(msg.from)) tags.add(msg.from)
-    sw.registration.showNotification(msg.from, {tag:msg.from, icon:profileExists.avatar, body:msg.content})
-    sw.addEventListener('notificationclick', e=>{
-        tags.delete(e.notification.tag)
-    })
-    sw.addEventListener('notificationclose', e=>{
-        tags.delete(e.notification.tag)
-    })
     await s.emit('update')
 })
+
+
+sw.addEventListener('notificationclick', e=>{
+    tags.delete(e.notification.tag)
+})
+sw.addEventListener('notificationclose', e=>{
+    tags.delete(e.notification.tag)
+})
+
 
 s.on('bio_update', async u=>{
     if(!db) return

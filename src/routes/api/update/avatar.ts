@@ -16,7 +16,7 @@ export const post:RequestHandler= async function ({request}) {
             try {
                 await sendPush(s, {event:'avatar_update', data:{username:user, avatar:body.content}})
             } catch (error) {
-                return
+                console.log(error);
             }
         })
         

@@ -13,7 +13,8 @@ export const post:RequestHandler= async function ({request}) {
         try {
             await sendPush(s, {event:'message_received', data:{id:body.id}})
         } catch (error) {
-            return
+            console.log(error);
+            
         }
     })
 

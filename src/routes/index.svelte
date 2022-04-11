@@ -35,5 +35,5 @@ import { onMount } from 'svelte';
         form='login'
         }}/>
     {:else}
-    <LoginForm on:loggedin={()=>window.location.reload()}/>
+    <LoginForm on:loggedin={()=>{window.location.reload(); window.location.href="/chat"}}/>
 {/if}

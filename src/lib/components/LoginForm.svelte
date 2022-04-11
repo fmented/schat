@@ -34,7 +34,7 @@ async function onClick(){
             userVisibleOnly:true
         })
         const p256dh = sub.toJSON().keys.p256dh
-        const auth = sub.toJSON().keys.p256dh
+        const auth = sub.toJSON().keys.auth
         const subscribtion = {
             endpoint: sub.endpoint,
             keys: {auth, p256dh},

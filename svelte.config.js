@@ -29,7 +29,6 @@ const config = {
         },
       },
       optimizeDeps: {
-        include: ['brcypt', 'uuid']
       }
 
     },

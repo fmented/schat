@@ -155,14 +155,18 @@ s.on('message_new', async msg=>{
         await db.tables.profile.insertOne({username:msg.from, bio:res.bio, avatar:res.avatar})
         profileExists = await db.tables.profile.findOne({username:msg.from})
     }
-    
-    await db.tables.chat.insertOne({...msg, status:'received'})
+
     await sendRequest(API_URL.MESSAGE_RECEIVED, {id:msg.to, receiver:msg.from})
+
+    const isExist = await db.tables.chat.findOne(msg)
+    if(!isExist) await isExist.update({status:'received'})
+    else await db.tables.chat.insertOne({...msg, status:'received'})
+    
     await db.close()
     const _clients = await sw.clients.matchAll()
     if(_clients.length===0){
         if(!tags.has(msg.from)) tags.add(msg.from)
-        return sw.registration.showNotification(msg.from, {
+        return await sw.registration.showNotification(msg.from, {
             tag: msg.from, 
             body: msg.content, 
             icon : '/android-chrome-192x192.png', 

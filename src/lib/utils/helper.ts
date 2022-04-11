@@ -89,17 +89,17 @@ export function initDB(name:string){
       if(res.ok){
         await db.open()
         await db.tables.chat.insertOne({...baseChat, status:'sent'})
-        const list = (await db.tables.chat.find({status:'pending'})).map(async ch=>{
-          try {
-            const r = await sendRequest(API_URL.MESSAGE_SEND, ch)
-            if(r.ok){
-              await ch.update({status:'sent'})
-            }
-          } catch{
-            return
-          }
-        })
-        await Promise.all(list)
+        // const list = (await db.tables.chat.find({status:'pending'})).map(async ch=>{
+        //   try {
+        //     const r = await sendRequest(API_URL.MESSAGE_SEND, ch)
+        //     if(r.ok){
+        //       await ch.update({status:'sent'})
+        //     }
+        //   } catch{
+        //     return
+        //   }
+        // })
+        // await Promise.all(list)
         await db.close()
       }
       else {

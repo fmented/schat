@@ -12,6 +12,7 @@
 </script>
 
 <script lang="ts">
+    import {SWContainerBridge} from 'utils/bridge'
     import {session} from '$app/stores'
     import {sendRequest, randomAvatar} from 'utils'
     import {API_URL} from 'interfaces'
@@ -42,14 +43,14 @@ async function save(){
 async function logout() {
     process = true
     const deviceId = localStorage.getItem('deviceId')
-    const res = await sendRequest(API_URL.AUTH_LOGOUT, {deviceId})
-    if(res.ok){
-        const sw = await navigator.serviceWorker.ready
-        const x = await sw.pushManager.getSubscription()
-        if(x) await x.unsubscribe()
+    const b = new SWContainerBridge(navigator.serviceWorker)
+    await b.emit('before_logout', deviceId)
+
+    b.on('unsubscribed', ()=>{
         localStorage.removeItem('deviceId')
         window.location.href = '/'
-    }
+    })
+
     process = false
 }
 

@@ -79,6 +79,8 @@ export type PostMessageEventMap = {
     subscribed:string,
     open:string
     update: string
+    before_logout: string,
+    unsubscribed: undefined
 }
 
 export type SWEventMap = PostMessageEventMap & PushEventMap

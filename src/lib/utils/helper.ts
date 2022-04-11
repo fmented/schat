@@ -43,7 +43,17 @@ export function initDB(name:string){
     })
     await db.close()
     const proc = await Promise.all(list)
-    return proc
+    return sortBy(proc, 'timeStamp')
+  }
+
+  function sortBy<T>(arr: T[], prop:keyof T, reverse:boolean=false){
+    const sortMod = reverse ? -1 : 1
+    const sort = (a: unknown, b: unknown) => {
+      return a[prop] < b[prop] ? -1 * sortMod
+          : a[prop] > b[prop] ? 1 * sortMod
+          : 0
+    }
+    return [...arr].sort(sort)
   }
   
   export async function getConversationWith(db:Database<{chat:Chat, profile:Profile}>, u:string){
@@ -58,7 +68,7 @@ export function initDB(name:string){
             }
     })
     await db.close()
-    return list
+    return sortBy(list, 'timeStamp')
   }
   
   export async function sendMessage(db:Database<{chat:Chat, profile:Profile}>, c:RawChat){
@@ -79,11 +89,11 @@ export function initDB(name:string){
       if(res.ok){
         await db.open()
         await db.tables.chat.insertOne({...baseChat, status:'sent'})
-        const list = (await db.tables.chat.find({status:'pending'})).map(async c=>{
+        const list = (await db.tables.chat.find({status:'pending'})).map(async ch=>{
           try {
-            const r = await sendRequest(API_URL.MESSAGE_SEND, c)
+            const r = await sendRequest(API_URL.MESSAGE_SEND, ch)
             if(r.ok){
-              await c.update({status:'sent'})
+              await ch.update({status:'sent'})
             }
           } catch{
             return

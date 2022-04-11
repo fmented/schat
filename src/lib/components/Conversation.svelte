@@ -7,16 +7,11 @@ import type {Database} from 'idb'
 import Message from './Message.svelte'
 import {session} from '$app/stores'
 import { initDB, getConversationWith, sendMessage as send } from "utils/helper";
-import {loRes} from 'utils/canvas'
 
 export let withUser:string
 let conversation:Chat[] = []
-let files:FileList
 let s:SWCType
 
-let wrapper:HTMLElement
-let chat:HTMLElement
-let fileInput: HTMLInputElement
 let db:Database<{chat:Chat, profile:Profile}>
 let profile:Profile
 
@@ -45,20 +40,6 @@ onMount(async ()=>{
 
 })
 
-$: if(files){
-    const f = files[0]
-    const reader = new FileReader()
-    reader.readAsDataURL(f)
-    reader.onload = async ()=>{
-        const content = await loRes(reader.result as string)
-        if(!db || process) return
-        process = true
-        await send(db, {from:$session.user, to:withUser, content})
-        conversation = await getConversationWith(db, withUser)
-        files = undefined
-        process = false
-    }
-}
 
 let process=false
 
@@ -82,7 +63,7 @@ let h:number
 
 <svelte:window bind:scrollY="{h}"/> 
 
-<div class="wrap" bind:this="{wrapper}">
+<div class="wrap">
     {#if profile}  
     <div class="header">
         <strong><a href="/chat" aria-label="back">🔙</a></strong>
@@ -100,20 +81,20 @@ let h:number
     <div class="form">
         <div>
             <label for="msg">msg</label>
-            <input type="text" id="msg" placeholder="type something" on:keypress="{sendMessage}" disabled={process}>
-            <label for="pic">pic</label>
-            <input type="file" id="pic" bind:files="{files}" bind:this="{fileInput}" accept="image/*" disabled={process}>
-            <span on:click="{()=>fileInput.click()}">📎</span>
+            <input type="text" id="msg" placeholder="type something" on:keypress="{sendMessage}" disabled={process} autocomplete="off">
         </div>
     </div>
 </div>
     
 <style>
-    label, input[type="file"]{
+    label{
         height: 0;
         width: 0;
         opacity: 0;
         visibility: collapse;
+        position: fixed;
+        top: 0;
+        left: 0;
     }
 
     .header{
@@ -141,29 +122,24 @@ let h:number
     }
 
     input[type="text"]{
-        flex-grow: 1;
-        height: 50%;
-    }
-
-    span{
-        font-size: 3rem;
+        height: calc(100% - 1rem);
+        width: calc(100% - 2rem)
     }
 
     .form div{
         width: 100%;
         height: 4rem;
         display: flex;
-        padding: 1rem .5rem;
         justify-content: center;
         align-items: center;
         margin-bottom: .5rem;
+        padding: .5rem .25rem;
     }
 
     .chat{
         padding-bottom: 6.5rem;
         display: flex;
         flex-direction: column;
-        gap: .25rem;
     }
 
     .form {

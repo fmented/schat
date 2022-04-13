@@ -23,7 +23,7 @@ export class SWBridge{
         })
 
         this.#sw.addEventListener('push', async (e:PushEvent)=>{
-            if(!e.data) return
+            if(!e.data) return            
             let d:{data:any, event:string}
             try {
                 d = e.data.json()
@@ -34,7 +34,7 @@ export class SWBridge{
             const event = d.event as P
             if(!event) return
             if(ev===event){
-                return e.waitUntil(cb(data))
+               e.waitUntil(cb(data))
             }
         })
     }
@@ -65,6 +65,7 @@ export class SWContainerBridge{
             }
         })
     }
+
     async emit<P extends keyof PostMessageEventMap>(ev:P, data:PostMessageEventMap[P]){
         this.#sw.ready.then(reg=>{
             reg.active.postMessage({event:ev, data})

@@ -1,17 +1,16 @@
 <script lang="ts">
-    import type { Profile } from "interfaces";
     import { sendRequest } from "utils";
     import {API_URL} from 'interfaces'
     import ListItem from './ListItem.svelte'
 
-    let people:Profile[]=[]
+    let people:{avatar:string, nickname:string, bio:string, id:string}[]=[]
     let q = ''
     let process=false
 
     async function search() {
         if(!q) return
         process = true
-        const res = await sendRequest(API_URL.AUTH_FIND, {username: q})
+        const res = await sendRequest(API_URL.AUTH_FIND, {deviceId: q})
         if(res.ok){
             people = await res.json()
         }        
@@ -27,8 +26,8 @@
 
 <div>
     {#each people as person}
-    <a href="/chat/{person.username}">
-        <ListItem img={person.avatar} text={{small:person.bio, strong:person.username}} />
+    <a href="/chat/{person.id}">
+        <ListItem img={person.avatar} text={{small:person.bio, strong:person.nickname}} />
     </a>
     {/each}
 </div>
@@ -53,20 +52,24 @@
     .sd{
         display: flex;
         justify-content: space-between;
-        background-color: black;
+        background-color: blueviolet;
         position: fixed;
-        top: 0;
+        top: 50px;
         left: 0;
         right: 0;
         height: 40px;
-        padding: .5rem .25rem;
+        padding: 1rem .25rem;
     }
 
     button{
         margin-left: .25rem;
+        background: black;
+        border-radius: 4px;
+        color: white;
+        font-size: 1.2rem;
     }
 
     div:not(.sd){
-        margin-top: calc(40px + 1.25rem);
+        margin-top: calc(100px + 1.5rem);
     }
 </style>

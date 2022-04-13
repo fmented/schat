@@ -1,33 +1,24 @@
 import cookie from "cookie"
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
 import {open, close} from 'model'
 import type {JwtPayload} from 'jsonwebtoken'
-import type {Profile} from 'interfaces'
-import type {UserSchemaType, SubscribtionSchemaType} from 'model'
+import type {SubscribtionSchemaType} from 'model'
 import { JWT_SECRET } from "$lib/secrets"
-
-export async function createToken(username:string, password:string){
-    let token:string;
-    if(! (await isUserExist(username))) throw new Error('user does not exist')
-    try {
-        const db = await open()
-        const user = await db.User.findOne({username}).lean()
-        await close()
-        if(await bcrypt.compare(password, user.password)){
-            token = jwt.sign({id:user._id, username:user.username, email:user.email, type:'user'}, JWT_SECRET, {expiresIn: `${28*24}h`})
-            return token
-        }
-        throw new Error('invalid username or password')
-    } catch (err) {
-        throw(err)
-    }
-}
 
 export async function subscribe(sub:SubscribtionSchemaType){
     const db = await open()
     await db.Subscribtion.create(sub)
+    const token = jwt.sign({deviceId:sub.deviceId}, JWT_SECRET, {expiresIn: `${28*24}h`})
     await close()
+    return token
+}
+
+export function setToken(token:string){
+    return cookie.serialize('token', token, {httpOnly:true, maxAge:28*24*60*60*1000, path:'/'})
+}
+
+export function invalidateToken(token:string){
+    return cookie.serialize('token', token, {httpOnly:true, maxAge:0, path:'/'})
 }
 
 export async function unsubscribe(u:{deviceId:string}){
@@ -38,9 +29,9 @@ export async function unsubscribe(u:{deviceId:string}){
 
 export async function isTokenValid(token:string){
     try {
-        const t = jwt.verify(token, JWT_SECRET) as JwtPayload
-        if(!t.username) return false
-        const userExists = await isUserExist(t.username)
+        const t = jwt.verify(token, JWT_SECRET) as JwtPayload & SubscribtionSchemaType
+        if(!t.nickname || !t.deviceId) return false
+        const userExists = await isUserExist(t.nickname)
         if(!userExists) return false
         return true
     } catch (err) {
@@ -48,21 +39,10 @@ export async function isTokenValid(token:string){
     }
 }
 
-export async function getIdFromToken(token:string):Promise<{id?:string, error?:string}> {
-    try {
-        const t = jwt.verify(token, JWT_SECRET) as JwtPayload
-        return{
-            id: t.id
-        }
-    } catch (err) {
-        return {error:err}
-    }
-}
-
-export async function isUserExist(username:string){
+export async function isUserExist(deviceId:string){
     try {
         const db = await open()
-        const user = await db.User.findOne({username}).lean()
+        const user = await db.Subscribtion.findOne({deviceId}).lean()
         await close()
         if(!user){
             return false
@@ -73,16 +53,16 @@ export async function isUserExist(username:string){
     }
 }
 
-export async function getUserDetail(username:string):Promise<Profile> {
+export async function getUserDetail(deviceId:string):Promise<{bio:string, avatar:string, nickname:string}> {
 
     try {
         const db = await open()
-        const user = await db.User.findOne({username})
+        const user = await db.Subscribtion.findOne({deviceId})
         await close()
-        if(!user?.username){
+        if(!user?.id){
             throw new Error('user not found')
         }
-        return {bio:user.bio, avatar:user.avatar, username:user.username}
+        return {bio:user.bio, avatar:user.avatar, nickname:user.nickname}
     } catch (e) {
         throw e
     }
@@ -97,24 +77,12 @@ export async function isAuthenticated(request:Request){
     return true
 }
 
-export async function createAccount(data:UserSchemaType) {
-    const userExists = await isUserExist(data.username)
-    if(userExists){
-        throw new Error('user does exist')
-    }
-    const db = await open()
-    const hashedPassword = await bcrypt.hash(data.password, 10)
 
-    await db.User.create({...data, password:hashedPassword, avatar:`https://avatars.dicebear.com/api/bottts/${data.username}.svg`})
-    await close()
-}
-
-export async function getSubscribtionList(username:string) {
+export async function getSubscribtion(deviceId:string) {
     const db = await open()
-    const list = await db.Subscribtion.find({username})
+    const sub = await db.Subscribtion.findOne({deviceId})
     await close()
-    return list
-    
+    return sub
 }
 
 export async function getCurrentUser(request:Request):Promise<string|null> {
@@ -123,21 +91,23 @@ export async function getCurrentUser(request:Request):Promise<string|null> {
     const auth = await isAuthenticated(request)
     if(!auth) return null
     const token = cookies.token
-    const t = jwt.verify(token, JWT_SECRET) as JwtPayload
-    return t.username as string
+    const t = jwt.verify(token, JWT_SECRET) as JwtPayload & SubscribtionSchemaType
+    return t.deviceId as string
 }
 
-export async function findUser(name:string) {
+export async function findUser(q:string) {
     const db = await open()
-    const people = await db.User.find({username:new RegExp(`${name}`, 'g')})
+    const people = await db.Subscribtion.find({nickname:new RegExp(`${q}`, 'g')})
     await close()
     return people
 }
 
-export async function updateProfile(username:string, content:string, type:'bio'|'avatar') {
+export async function updateProfile(deviceId:string, data:Partial<SubscribtionSchemaType>) {
     const db = await open()
-    const u = await db.User.findOne({username})
-    u[type] = content
+    const u = await db.Subscribtion.findOne({deviceId})
+    for(let k in data){
+        u[k] = data[k]
+    }
     await u.save()
     await close()
 }

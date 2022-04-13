@@ -8,7 +8,8 @@ declare namespace App {
 	interface Session {
 		user:string,
 		bio:string,
-		avatar:string
+		avatar:string,
+		nickname:string
 	}
 	// interface Stuff {}
 }

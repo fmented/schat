@@ -1,4 +1,6 @@
 import mongoose from 'mongoose'
+import {v4} from 'uuid' 
+import {randAva} from 'utils'
 
 const SubSchema = new mongoose.Schema<SubType>({
     endpoint: {
@@ -18,14 +20,24 @@ const SubSchema = new mongoose.Schema<SubType>({
             required: true
         }
     },
-    username: {
+    nickname: {
         required: true,
         type: String
     },
     deviceId:{
         type: String,
-        required: true
+        required: true,
+        default: v4
+    },
+    bio:{
+        type: String,
+        default: ()=>'Hi there!'
+    },
+    avatar:{
+        type: String,
+        default: randAva
     }
+
 
 })
 
@@ -33,8 +45,10 @@ export type SubType = {
     endpoint:string,
     keys: SubKeyType
     expirationTime?: string|null,
-    username:string,
-    deviceId:string
+    nickname:string,
+    deviceId:string,
+    bio?:string,
+    avatar?:string,
 }
 
 type SubKeyType = {

@@ -1,12 +1,10 @@
 <script lang="ts" context="module">
     import type {Load} from '@sveltejs/kit'
-    import LoginForm from 'components/LoginForm.svelte'
-    import RegisterForm from 'components/RegisterForm.svelte'
-import { onMount } from 'svelte';
+    import { onMount } from 'svelte';
     export const load:Load = async ({session}) => {
         if(session.user){
             return {
-                status: 301,
+                status: 302,
                 redirect: '/chat'
             }
         }
@@ -15,25 +13,22 @@ import { onMount } from 'svelte';
 </script>
 
 <script>
-    let forceToLogin = false
-    let form = 'register'
-
-    onMount(async ()=>{
-    })
+import SubscribtionForm from "components/SubscribtionForm.svelte"
 </script>
 
-{#if !forceToLogin}
-    <div>
-        <button on:click="{()=>form='register'}">Sign Up</button>
-        <button on:click="{()=>form='login'}">Login</button>
-    </div>
-{/if}
+<div>
+    <strong>schat</strong>
+</div>
+<SubscribtionForm on:subscribed={()=>window.location.href="/chat"}/>
 
-{#if form === 'register'}
-    <RegisterForm on:created={()=>{
-        forceToLogin=true
-        form='login'
-        }}/>
-    {:else}
-    <LoginForm on:loggedin={()=>{window.location.reload(); window.location.href="/chat"}}/>
-{/if}
+<style>
+    div:first-of-type{
+        background-color: blueviolet;
+        color: white;
+        padding: 1rem .5rem;
+        margin-inline: -.5rem;
+        margin-top: -.5rem;
+        margin-bottom: .5rem;
+        font-size: 1.4rem;
+    }
+</style>

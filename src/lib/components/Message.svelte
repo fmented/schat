@@ -1,7 +1,14 @@
 <script lang="ts">
-    import type {Chat} from 'interfaces'
+    import type {Message} from 'interfaces'
     import {session} from '$app/stores'
-    export let message:Chat
+    export let message:Message
+
+
+    function parseDate(timeStamp:number) {
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        const d = new Date(timeStamp)
+        return `${d.getDate()} ${months[d.getMonth()]} @ ${d.getHours()}:${d.getMinutes()}`
+    }
 </script>
 
 <div class="wrap" class:right={message.from === $session.user}>
@@ -12,13 +19,10 @@
         <p>{message.content}</p>
         {/if}
         <div>
-            <span>{new Date(message.timeStamp).getDate()} {new Date(message.timeStamp).getMonth()}
-                @ {new Date(message.timeStamp).getHours()} : {new Date(message.timeStamp).getMinutes()}
-            </span>
+            <span>{parseDate(message.timeStamp)}</span>
             {#if message.from === $session.user}
                 <span>{
                 message.status==='pending'?'⏱'
-                :message.status === 'sending'? '📤'
                 :message.status === 'sent'? '🛫'
                 :message.status === 'received' ? '📦'
                 :'👁‍🗨'}
@@ -33,6 +37,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    margin-bottom: .25rem;
 }
 
 .wrap.right{
@@ -59,7 +64,8 @@ img{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: .5rem;
+    padding: .25rem;
+    gap: 1rem;
 }
 
 p{

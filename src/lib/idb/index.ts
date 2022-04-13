@@ -1,8 +1,3 @@
-import type {Chat, Profile, RawChat} from 'interfaces'
-import {sendRequest} from 'utils'
-import {API_URL} from 'interfaces'
-import {v4} from 'uuid'
-
 class CArray<T> extends Array<T>{
   
   sortBy(prop:keyof T, reverse:boolean=false){
@@ -43,7 +38,7 @@ function every<T>(obj1:T|Comparator<T>, obj2:T ):boolean{
   if (typeof obj1 === "object") {
     return Object.keys(obj1).every(key=>{
       const prop1 = obj1[key]
-      const prop2 = obj1[key]
+      const prop2 = obj2[key]
       return every(prop1, prop2)
     })
   }
@@ -55,7 +50,7 @@ function some<T>(obj1:T|Comparator<T>, obj2:T ):boolean{
   if (typeof obj1 === "object") {
     return Object.keys(obj1).some(key=>{
       const prop1 = obj1[key]
-      const prop2 = obj1[key]
+      const prop2 = obj2[key]
       return some(prop1, prop2)
     })
   }
@@ -114,11 +109,11 @@ export class TableStore<T> {
             {
               ...value,
               $pk: pk,
-              update: (data)=> {
+              update: async (data)=> {
                 const toUpdate = {...value, ...data}
-                return this.update(pk, toUpdate)
+                return await this.update(pk, toUpdate)
               },
-              delete: ()=> this.delete(pk)
+              delete: async ()=> await this.delete(pk)
             }
           )
           c.continue()
@@ -148,8 +143,8 @@ export class TableStore<T> {
             data = {
               ...value,
               $pk: pk,
-              update: (data)=> this.update(pk, {...value, ...data}),
-              delete: ()=> this.delete(pk)
+              update: async (data)=> await this.update(pk, {...value, ...data}),
+              delete: async ()=>await this.delete(pk)
             }
             return
           }
@@ -181,11 +176,11 @@ export class TableStore<T> {
             {
               ...value,
               $pk: pk,
-              update: (data)=> {
+              update: async (data)=> {
                 const toUpdate = {...value, ...data}
-                return this.update(pk, toUpdate)
+                return await this.update(pk, toUpdate)
               },
-              delete: ()=> this.delete(pk)
+              delete: async ()=> await this.delete(pk)
             }
           )
           c.continue()
@@ -215,8 +210,8 @@ export class TableStore<T> {
             data = {
               ...value,
               $pk: pk,
-              update: (data)=> this.update(pk, {...value, ...data}),
-              delete: ()=> this.delete(pk)
+              update: async (data)=> await this.update(pk, {...value, ...data}),
+              delete: async ()=> await this.delete(pk)
             }
             return
           }
@@ -307,11 +302,14 @@ export class TableStore<T> {
   update($pk: number, data: T):Promise<void> {
     const tx = this.#tx()
     return new Promise((resolve, reject)=>{
-      const req = tx.objectStore(this.#name).put(data, $pk)
-      req.onsuccess = () => 
-      req.onerror = e => reject(e)
-      tx.oncomplete = ()=> resolve()
+      const cursor = tx.objectStore(this.#name).openCursor($pk)
+      cursor.onsuccess = ()=> {
+        cursor.result.update(data)
+      }
+
+      cursor.onerror = e => reject(e)
       tx.onerror = e=> reject(e)
+      tx.oncomplete = _=>resolve()
     })
   }
 
@@ -394,7 +392,7 @@ export class TableStore<T> {
     })
   }
 
-  retrieve<K>(get: (data: T) => K | void, {index, direction}:CursorOption<T>={}): Promise<CArray<K>> {
+  retrieve<K>(get: (data: T) =>  K |void, {index, direction}:CursorOption<T>={}): Promise<CArray<K>> {
     const values: CArray<K> = new CArray()
     const tx = this.#tx("readonly")
     return new Promise((resolve, reject) => {
@@ -482,6 +480,7 @@ export class Database<T>{
         request.onupgradeneeded = () => {
           const db = request.result
           for (const table in this.#tableDefinition) {
+            if(db.objectStoreNames.contains(table)) continue
               const obj = db.createObjectStore(table, { autoIncrement: true })
               for(const col of this.#tableDefinition[table]){
                 obj.createIndex(col.name as unknown as string, col.name as unknown as string, col.unique? {unique:true}: {})
@@ -567,12 +566,12 @@ function xor<T = Primitive>(a:Comparator<T>, b:Comparator<T>) {
     return (v:T)=> a(v)===b(v)? false : true
 }
 
-function and<T = Primitive>(...f:Comparator<T>[]) {
-  return (v:T)=> f.every(fun=>fun(v))
+function and<T = Primitive>(...f:(Comparator<T>|T)[]) {
+  return (v:T)=> f.every(x=>isComparator(x)? x(v) : x===v )
 }
 
-function or<T = Primitive>(...f:Comparator<T>[]) {
-  return (v:T)=> f.some(fun=>fun(v))
+function or<T = Primitive>(...f:(Comparator<T>|T)[]) {
+  return (v:T)=> f.some(x=>isComparator(x)? x(v) : x===v )
 }
 
 export const q = {

@@ -1,49 +1,41 @@
 import { Database } from "idb"
-import type {Chat, RawChat, Profile} from 'interfaces'
+import type {Message, RawMessage, Conversation} from 'interfaces'
 import {sendRequest} from './fetch'
 import {API_URL} from 'interfaces'
 import {v4} from 'uuid'
 
-export function initDB(name:string){
-    return new Database<{chat:Chat, profile:Profile}>(name, {
-      chat: [
-          {name:'from'},
-          {name:'to'},
-          {name:'content'},
-          {name:'timeStamp'},
-          {name:'id', unique:true},
-          {name:'status'}
-      ],
-      profile:[
-          {name:'username', unique:true},
-          {name:'bio'},
-          {name:'avatar'}
+type D = Database<{conv:Conversation}>
+
+export function initDB(){
+    return new Database<{conv:Conversation}>('schat-data', {
+      conv: [
+          {name:'thumbnail'},
+          {name:'with'},
+          {name:'chat'},
+          {name:'alias'}
       ]
   })
   }
   
   
-  export async function getConversationList(db:Database<{chat:Chat, profile:Profile}>){
-    await db.open()
-    const profile = await db.tables.profile.all()
-    const list = profile.map(async p=>{
-      const {content, timeStamp, from, status, to, id} = await db.tables.chat.searchOne({from:p.username, to:p.username}, {direction:'prev'})
-      return {
-        with: p.username,
-        pic: p.avatar,
-        content, timeStamp, from, status, to, id,
-        delete: async ()=>{
-          await db.open()
-          const list = await db.tables.chat.search({from:p.username, to:p.username})
-          const proc = list.map(async x=> await x.delete())
-          await Promise.all(proc)
-          await db.close()
-        }
+  export async function getConversationList(db:D){
+    await db.open()    
+    const list = await db.tables.conv.retrieve(async c=>{
+        const {chat, with: w, thumbnail} = c
+        const {content, timeStamp, from, status, to, id} = chat[chat.length-1]
+        return {
+          with:w,
+          pic: thumbnail,
+          content, timeStamp, from, to, status, id,
+          delete: async ()=>{
+            await db.open()
+            await (await db.tables.conv.findOne({with:w})).delete()
+          }
       }
     })
-    await db.close()
-    const proc = await Promise.all(list)
-    return sortBy(proc, 'timeStamp')
+    
+    const x = await Promise.all([...list])
+    return sortBy(x, 'timeStamp')
   }
 
   function sortBy<T>(arr: T[], prop:keyof T, reverse:boolean=false){
@@ -56,81 +48,67 @@ export function initDB(name:string){
     return [...arr].sort(sort)
   }
   
-  export async function getConversationWith(db:Database<{chat:Chat, profile:Profile}>, u:string){
+  export async function getConversationWith(db:D, u:string){
     await db.open()
-    const list = (await db.tables.chat.search({from:u, to:u})).map(c=>{
-        return {...c, 
-                delete: async ()=>{
-                    await db.open()
-                    await c.delete()
-                    await db.close()
-                }
-            }
-    })
-    await db.close()
-    return sortBy(list, 'timeStamp')
+    const chat = (await db.tables.conv.searchOne({with:u})).chat
+    return sortBy(chat, 'timeStamp')
   }
   
-  export async function sendMessage(db:Database<{chat:Chat, profile:Profile}>, c:RawChat){
+  export async function sendMessage(db:D, c:RawMessage, {thumb, alias}:{thumb:string, alias:string}){
     const id:string = v4()
     const timeStamp = Date.now()
     const baseChat = {...c, id, timeStamp}
 
     await db.open()
-    const u = await db.tables.profile.has({username: c.to})
-    if(!u){
-      const res = await (await sendRequest(API_URL.AUTH_DETAIL, {username:c.to})).json()
-      await db.tables.profile.insertOne({username:c.to, avatar:res.avatar, bio:res.bio})
+    let conv = await db.tables.conv.findOne({with:c.to})
+    if(!conv){
+      await db.tables.conv.insertOne({thumbnail:thumb, chat:[{...baseChat, status:'sent'}], with:c.to, alias})
+      conv = await db.tables.conv.findOne({with:c.to})
     }
-    await db.close()
+    else{
+      await conv.update({chat:[...conv.chat, {...baseChat, status:'sent'}]})
+    }
 
     try {
       const res = await sendRequest(API_URL.MESSAGE_SEND, baseChat)
       if(res.ok){
         await db.open()
-        await db.tables.chat.insertOne({...baseChat, status:'sent'})
-        const list = (await db.tables.chat.find({status:'pending'})).map(async ch=>{
-          try {
-            const r = await sendRequest(API_URL.MESSAGE_SEND, ch)
+        const list = (await db.tables.conv.findOne({with:c.to})).chat.filter(c=>c.status==='pending')
+        
+        const plist = list.map(async (ch)=>{
+          const r = await sendRequest(API_URL.MESSAGE_SEND, ch)
             if(r.ok){
-              await ch.update({status:'sent'})
+              const chat = (await db.tables.conv.findOne({with:c.to})).chat
+              await conv.update({chat:updateMessageStatus(chat, 'sent', ch.id)})
             }
-          } catch{
-            return
-          }
-        })
-        await Promise.all(list)
-        await db.close()
+          })
+          
+        await Promise.all(plist)
       }
       else {
         await db.open()
-        await db.tables.chat.insertOne({...baseChat, status:'pending'})
-        await db.close()
+        await conv.update({chat:[...conv.chat, {...baseChat, status:'pending'}]})
       }
     } catch{
       await db.open()
-      await db.tables.chat.insertOne({...baseChat, status:'pending'})
-      await db.close()
+      await conv.update({chat:[...conv.chat, {...baseChat, status:'pending'}]})
     }
     
   }
 
-  export async function markAs(db:Database<{chat:Chat, profile:Profile}>, as:'received'|'seen', id:string){
+  export async function sync(db:D, data:{conv:Conversation[]}){
       await db.open()
-      await (await db.tables.chat.findOne({id})).update({status:as})
-      await db.close()
+      await Promise.all(data.conv.map(async c=>{
+          const exist = await db.tables.conv.includes({with:c.with})
+          if(!exist) await db.tables.conv.insertOne(c)
+      }))
   }
 
-  export async function sync(db:Database<{chat:Chat, profile:Profile}>, data:{chat:Chat[], profile:Profile[]}){
-      await db.open()
-      await Promise.all(data.chat.map(async c=>{
-          const exist = await db.tables.chat.includes({id:c.id})
-          if(!exist) await db.tables.chat.insertOne(c)
-      }))
-      await Promise.all(data.profile.map(async p=>{
-        const exist = await db.tables.profile.includes({username:p.username})
-        if(!exist) await db.tables.profile.insertOne(p)
-      }))
-      await db.close()
+  export function updateMessageStatus(chat:Message[], status:Message['status'], id:Message['id']|Message['id'][]){
+    return chat.map(c=>{
+      if(Array.isArray(id)){
+        return id.includes(c.id) ? {...c, status} : c
+      }
+      return (c.id===id) ? {...c, status} : c
+    })
   }
-

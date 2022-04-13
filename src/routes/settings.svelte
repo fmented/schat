@@ -3,7 +3,7 @@
     export const load:Load = async ({session}) => {
         if(!session.user){
             return {
-                status: 301,
+                status: 302,
                 redirect: '/'
             }
         }
@@ -14,27 +14,20 @@
 <script lang="ts">
     import {SWContainerBridge} from 'utils/bridge'
     import {session} from '$app/stores'
-    import {sendRequest, randomAvatar} from 'utils'
+    import {sendRequest, randAva} from 'utils'
     import {API_URL} from 'interfaces'
     import {initDB} from 'utils/helper'
+    import Head from 'components/Head.svelte'
+import { DB_NAME } from '$lib/secrets';
 
-let imgSrc:string = ''
-let bioText = $session.bio
-
+let avatar = ''
+let bio = $session.bio
+let nickname = $session.nickname
 let process = false
 
 async function save(){
     process = true
-    const db = initDB($session.user)
-    await db.open()
-    const people = await db.tables.profile.retrieve(p=>p.username)
-    await db.close()
-    if(imgSrc && imgSrc !== $session.avatar){
-        await sendRequest(API_URL.UPDATE_AVATAR, {receiver:people, content:imgSrc})
-    }
-    if(bioText !== $session.bio){
-        await sendRequest(API_URL.UPDATE_BIO, {receiver:people, content:bioText})
-    }
+    await sendRequest(API_URL.UPDATE_PROFILE, {avatar:avatar?avatar:$session.avatar, bio, nickname})
     process = false
     window.location.reload()
 }
@@ -42,32 +35,38 @@ async function save(){
 
 async function logout() {
     process = true
-    const deviceId = localStorage.getItem('deviceId')
     const b = new SWContainerBridge(navigator.serviceWorker)
-    await b.emit('before_logout', deviceId)
-
-    b.on('unsubscribed', ()=>{
-        localStorage.removeItem('deviceId')
-        window.location.href = '/'
-    })
-
+    await b.emit('before_unsubscribe', undefined)
+    const sw = await navigator.serviceWorker.ready
+    const s = await sw.pushManager.getSubscription()
+    if(s){
+        await s.unsubscribe()
+        const db = initDB()
+        await db.delete()
+    }
+    await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)
+    window.location.href = '/'
     process = false
 }
 
 
 </script>
 
+<Head/>
+
 <main>
     <div class="ava">
         <label for="pic">Pic</label>
-        <img src={imgSrc?imgSrc:$session.avatar} alt="user profile" on:click="{()=> {if(!process) imgSrc=randomAvatar()}}">
-        {#if imgSrc}
-            <span on:click="{()=>{imgSrc=''}}">❌</span>
+        <img src={avatar?avatar:$session.avatar} alt="user profile" on:click="{()=> {if(!process) avatar=randAva()}}">
+        {#if avatar}
+            <span on:click="{()=>{avatar=''}}">❌</span>
         {/if}
     </div>
     <div class="bio">
+        <label for="nickname">Nickname</label>
+        <input id="nickname" bind:value={nickname} disabled={process}>
         <label for="bio">Bio</label>
-        <textarea id="" rows="6" bind:value={bioText} disabled={process}></textarea>
+        <textarea id="" rows="6" bind:value={bio} disabled={process}></textarea>
         <button on:click="{save}" disabled={process}>Save</button>
     </div>
     <hr>
@@ -75,6 +74,10 @@ async function logout() {
 </main>
 
 <style>
+
+    main{
+        margin-top: 100px;
+    }
     label {
         width: 100%;
     }
@@ -87,7 +90,7 @@ async function logout() {
     }
 
     main .ava{
-        max-width: 50%;
+        max-width: min(50%, 300px);
         position: relative;
         margin: auto;
     }
@@ -111,10 +114,18 @@ async function logout() {
 
     button{
         width: 100%;
-        padding: .25em;
+        padding: .5em .25em;
+        color: white;
+        background: blueviolet;
+        border-radius: 4px;
     }
 
     hr{
         margin: 2rem;
+    }
+
+    textarea{
+        border-radius: 4px;
+        resize: none;
     }
 </style>

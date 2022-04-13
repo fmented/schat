@@ -1,13 +1,15 @@
-<script lang="ts" type="svelte-data">
+<script lang="ts">
 import { sendRequest, SWContainerBridge } from "utils";
 import type { SWContainerBridge as SWCType } from "utils";
 import { onMount, createEventDispatcher} from 'svelte';
 import {PUBLIC_KEY} from '$lib/secrets'
 import {API_URL} from 'interfaces'
-let username=''
-let password=''
+import {v4} from 'uuid'
+
+const dt = Date.now();
+
+let nickname = `user-${dt}`;
 let s:SWCType
-let message:string = ''
 const d = createEventDispatcher()
 onMount(()=>{
     s= new SWContainerBridge(navigator.serviceWorker)
@@ -16,18 +18,8 @@ onMount(()=>{
 let process= false
 
 async function onClick(){
-    if(!username || !password) return 
-    process = true
-    message = ''
-    const res = await sendRequest(API_URL.AUTH_LOGIN, {username, password}, window.fetch)
-    
-    if(res.ok){
-        const {status, message:msg} = await res.json()
-
-        if(status == 'error') {
-            message = msg
-            return process = false
-        }
+        if(!nickname) return 
+        process = true
         const sw = await navigator.serviceWorker.ready
         const sub = await sw.pushManager.subscribe({
             applicationServerKey:PUBLIC_KEY,
@@ -35,32 +27,24 @@ async function onClick(){
         })
         const p256dh = sub.toJSON().keys.p256dh
         const auth = sub.toJSON().keys.auth
+        const deviceId = v4()
         const subscribtion = {
             endpoint: sub.endpoint,
             keys: {auth, p256dh},
-            username
+            nickname,
+            deviceId,
         }
-        s.emit('after_login', subscribtion)
-        s.on('subscribed', s =>{
-            localStorage.setItem('deviceId', s)
-            d('loggedin') 
-        })
-
+        await sendRequest(API_URL.AUTH_SUBSCRIBE, subscribtion)
+        d('subscribed')
+        process = false
     }
-    process = false
-}
 </script>
 
 <div class="wrap">
-    <p>{process? 'Please Wait': message}</p>
-
-    <label for="username">Username</label>
-    <input type="text" id="username" bind:value="{username}">
-
-    <label for="password">Password</label>
-    <input type="password" id="password" bind:value="{password}">
-    
-    <button on:click|preventDefault={onClick} disabled={process}>Login</button>
+    <p>{process? 'Please Wait': ''}</p>
+    <label for="nickname">Nickname</label>
+    <input type="text" id="nickname" bind:value="{nickname}">
+    <button on:click|preventDefault={onClick} disabled={process}>Subscribe</button>
 </div>
 
 <style>
@@ -72,10 +56,13 @@ async function onClick(){
 
     button{
         margin-top: .5rem;
+        background: blueviolet;
+        color: white;
     }
 
     input, button{
         padding: .5rem .25rem;
+        border-radius: 4px;
     }
 
 </style>

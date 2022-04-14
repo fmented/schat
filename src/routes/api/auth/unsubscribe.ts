@@ -7,7 +7,6 @@ export const post:RequestHandler= async function ({request}) {
     if (user) await unsubscribe({deviceId:user})
     const cookies = cookie.parse(request.headers.get('cookie')||'')
     return {
-        status:301,
         headers:{
             'set-cookie': invalidateToken(cookies.token),
         }

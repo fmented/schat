@@ -29,17 +29,21 @@
     onMount(async()=>{
         db = initDB()
         await db.open()
-        conversation = sortBy((await db.tables.conv.all({direction:'prev'})).map(c=>({thumbnail:c.thumbnail, alias:c.alias, content:c.chat[c.chat.length-1].content, timeStamp:c.chat[c.chat.length-1].timeStamp, with:c.with})), 'timeStamp')
+        conversation = sortBy((await db.tables.conv.all({direction:'prev'})).map(c=>({thumbnail:c.thumbnail, alias:c.alias, content:c.chat[c.chat.length-1].content, timeStamp:c.chat[c.chat.length-1].timeStamp, with:c.with})), 'timeStamp', true)
         s = new SWContainerBridge(navigator.serviceWorker)
         s.on('update', async _ => {
             if(!db) return
-            conversation = sortBy((await db.tables.conv.all({direction:'prev'})).map(c=>({thumbnail:c.thumbnail, alias:c.alias, content:c.chat[c.chat.length-1].content, timeStamp:c.chat[c.chat.length-1].timeStamp, with:c.with})), 'timeStamp')
+            conversation = sortBy((await db.tables.conv.all({direction:'prev'})).map(c=>({thumbnail:c.thumbnail, alias:c.alias, content:c.chat[c.chat.length-1].content, timeStamp:c.chat[c.chat.length-1].timeStamp, with:c.with})), 'timeStamp', true)
         })
 
         loading = false
     })
 
 </script>
+
+<svelte:head>
+		<link rel="manifest" href="/manifest.json">
+</svelte:head>
 
 <Head>
 schat

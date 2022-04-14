@@ -24,6 +24,9 @@ import Message from 'components/Message.svelte';
 
 </script>
 
+<svelte:head>
+		<link rel="manifest" href="/manifest.json">
+</svelte:head>
 {#if conversation}
     
 <div class="wrap">

@@ -95,13 +95,16 @@ const s = new SWBridge(sw)
 
 
 s.on('before_unsubscribe',  async()=>{
-    const sub = await sw.registration.pushManager.getSubscription()
+    const sub = await sw.registration.pushManager.getSubscription()    
     if(sub) {
-        sub.unsubscribe()
+        await sub.unsubscribe()
+        if(db) {
+            await db.tables.conv.clear()
+            await db.delete()
+        }
         db=undefined
-        await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)
-        await s.emit('unsubscribed')
     }
+    await s.emit('unsubscribed')
 })
 
 

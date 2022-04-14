@@ -12,6 +12,8 @@
         return {}
     }
 </script>
-
+<svelte:head>
+		<link rel="manifest" href="/manifest.json">
+</svelte:head>
 <Head/>
 <SearchForm/>

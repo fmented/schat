@@ -16,8 +16,6 @@
   export let user: string;
   export let avatar: string;
   export let nickname: string;
-
-  console.log(avatar);
   
   let conversation: Conversation["chat"] = [];
   let s: SWCType;

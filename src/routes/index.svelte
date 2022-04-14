@@ -14,7 +14,9 @@
 <script>
 import SubscribtionForm from "components/SubscribtionForm.svelte"
 </script>
-
+<svelte:head>
+		<link rel="manifest" href="/manifest.json">
+</svelte:head>
 <div>
     <strong>schat</strong>
 </div>

@@ -18,7 +18,6 @@
     import {API_URL} from 'interfaces'
     import {initDB} from 'utils/helper'
     import Head from 'components/Head.svelte'
-import { DB_NAME } from '$lib/secrets';
 
 let avatar = ''
 let bio = $session.bio
@@ -38,14 +37,18 @@ async function logout() {
     const b = new SWContainerBridge(navigator.serviceWorker)
     await b.emit('before_unsubscribe', undefined)
     b.on('unsubscribed', async ()=>{
+    await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)        
+        
+        process = false
         window.location.href = '/'
     })
-    process = false
 }
 
 
 </script>
-
+<svelte:head>
+		<link rel="manifest" href="/manifest.json">
+</svelte:head>
 <Head/>
 
 <main>

@@ -26,6 +26,7 @@
         grid-template-columns: 50px 1fr;
         height: 50px;
         gap: .5rem;
+        margin-bottom: .25rem;
     }
 
     img{

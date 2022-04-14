@@ -1,35 +1,3 @@
-<script lang="ts" context="module">
-  import type { Load } from "@sveltejs/kit";
-
-  export const load: Load = async ({ session, params, fetch }) => {
-    if (!session.user) {
-      return {
-        status: 301,
-        redirect: "/",
-      };
-    }
-
-    if (session.user === params.username) {
-      return {
-        status: 302,
-        redirect: "/chat",
-      };
-    }
-   
-      const r = await fetch("/api/auth/detail", {
-        method: "POST",
-        body: JSON.stringify({ deviceId: params.user }),
-      });
-      if(r.ok){
-        const u = await r.json();
-        return {
-          props: { ...u, user: params.user },
-        };
-      }
-      return { status: 301, redirect: `/chat/archive/${params.user}` };
-  };
-</script>
-
 <script lang="ts">
   import { onMount } from "svelte";
   import { sendRequest, SWContainerBridge } from "utils";
@@ -49,6 +17,8 @@
   export let avatar: string;
   export let nickname: string;
 
+  console.log(avatar);
+  
   let conversation: Conversation["chat"] = [];
   let s: SWCType;
 

@@ -1,33 +1,5 @@
-<script context="module" lang="ts">
-    import type {Load} from '@sveltejs/kit'
-import { onMount } from 'svelte';
-    export const load:Load = async ({session, params}) => {
-        if(!session.user){
-            return {
-                status: 301,
-                redirect: '/'
-            }
-        }
-        
-        if(session.user===params.user){
-            return {
-                status: 301,
-                redirect: '/chat'
-            }
-        }
-        const res = await fetch('/api/auth/detail', {method:'POST', body:JSON.stringify({deviceId:params.user})})
-        if (res.ok) return {status:301, redirect:`/chat/${params.user}`}
-        return{
-            props:{
-                u:params.user
-            }
-        }
-
-    }
-
-</script>
-
 <script lang="ts">
+import { onMount } from 'svelte';
 import type { Database } from 'idb';
 import type { Conversation} from 'interfaces';
 import {initDB} from 'utils/helper'

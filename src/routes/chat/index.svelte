@@ -3,7 +3,7 @@
     export const load:Load = async ({session}) => {
         if(!session.user){
             return {
-                status: 302,
+                status: 301,
                 redirect: '/'
             }
         }
@@ -14,26 +14,26 @@
     import { onMount } from "svelte";
     import { SWContainerBridge } from "utils";
     import type { SWContainerBridge as SWCType } from "utils";
-    import type {Conversation} from 'interfaces'
+    import type {Conversation, Message} from 'interfaces'
     import ListItem from 'components/ListItem.svelte'
-    import {initDB} from 'utils/helper'
+    import {initDB, sortBy} from 'utils/helper'
     import type { Database } from "idb";
     import Head from 'components/Head.svelte'
 
 
     let db:Database<{conv:Conversation}>
-    let conversation:Conversation[]=[];
+    let conversation:{thumbnail:Conversation['thumbnail'], alias:Conversation['alias'], content:Message['content'], with:Conversation['with']}[]=[];
     let s:SWCType
     let loading=true
 
     onMount(async()=>{
         db = initDB()
         await db.open()
-        conversation = await db.tables.conv.all({direction:'prev'})
+        conversation = sortBy((await db.tables.conv.all({direction:'prev'})).map(c=>({thumbnail:c.thumbnail, alias:c.alias, content:c.chat[c.chat.length-1].content, timeStamp:c.chat[c.chat.length-1].timeStamp, with:c.with})), 'timeStamp')
         s = new SWContainerBridge(navigator.serviceWorker)
         s.on('update', async _ => {
             if(!db) return
-            conversation = await db.tables.conv.all({direction:'prev'})
+            conversation = sortBy((await db.tables.conv.all({direction:'prev'})).map(c=>({thumbnail:c.thumbnail, alias:c.alias, content:c.chat[c.chat.length-1].content, timeStamp:c.chat[c.chat.length-1].timeStamp, with:c.with})), 'timeStamp')
         })
 
         loading = false
@@ -51,7 +51,7 @@ schat
        {:else} 
         {#each conversation as c}
         <a href="/chat/{c.with}/" >
-            <ListItem img={c.thumbnail} text={{strong:c.alias, small:c.chat[c.chat.length-1].content}}/>
+            <ListItem img={c.thumbnail} text={{strong:c.alias, small:c.content}}/>
         </a>
         {/each}
     {/if}

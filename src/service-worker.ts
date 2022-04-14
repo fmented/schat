@@ -94,8 +94,14 @@ const tags = new Map()
 const s = new SWBridge(sw)
 
 
-s.on('before_unsubscribe',  ()=>{
-    db=undefined
+s.on('before_unsubscribe',  async()=>{
+    const sub = await sw.registration.pushManager.getSubscription()
+    if(sub) {
+        sub.unsubscribe()
+        db=undefined
+        await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)
+        await s.emit('unsubscribed')
+    }
 })
 
 
@@ -151,7 +157,8 @@ s.on('message_new', async msg=>{
             icon : msg.thumbnail, 
             renotify: false,
             vibrate: [100, 200, 300, 200, 100, 200, 300],
-            timestamp: msg.timeStamp
+            timestamp: msg.timeStamp,
+            badge:'/favicon-32x32.png'
         })
 
 })

@@ -37,15 +37,9 @@ async function logout() {
     process = true
     const b = new SWContainerBridge(navigator.serviceWorker)
     await b.emit('before_unsubscribe', undefined)
-    const sw = await navigator.serviceWorker.ready
-    const s = await sw.pushManager.getSubscription()
-    if(s){
-        await s.unsubscribe()
-        const db = initDB()
-        await db.delete()
-    }
-    await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)
-    window.location.href = '/'
+    b.on('unsubscribed', async ()=>{
+        window.location.href = '/'
+    })
     process = false
 }
 

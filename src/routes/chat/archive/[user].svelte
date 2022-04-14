@@ -15,16 +15,14 @@ import { onMount } from 'svelte';
                 redirect: '/chat'
             }
         }
-
-        const r = await fetch('/api/auth/detail', {method:'POST', body:JSON.stringify({deviceId:params.user})})
-        const u = await r.json()
-        if(u) return {status:301, redirect:`/chat/archive/${params.user}`}
-
+        const res = await fetch('/api/auth/detail', {method:'POST', body:JSON.stringify({deviceId:params.user})})
+        if (res.ok) return {status:301, redirect:`/chat/${params.user}`}
         return{
             props:{
                 u:params.user
             }
         }
+
     }
 
 </script>
@@ -49,7 +47,7 @@ import Message from 'components/Message.svelte';
         const conv = await db.tables.conv.findOne({with:u})
         if(!conv) window.location.href = '/chat'
         conversation = conv
-        process = false
+        process = false        
     })
 
 </script>
@@ -98,7 +96,7 @@ import Message from 'components/Message.svelte';
         </a></strong
       >
       <strong class="username">{conversation.alias}</strong>
-      <img src={conversation.thumbnail} alt={conversation?.alias} height="30" width="30" />
+      <img src={conversation.thumbnail} alt={conversation.alias} height="30" width="30" />
     </div>
 
   <div class="chat" bind:clientHeight={h}>

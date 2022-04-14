@@ -38,7 +38,7 @@ export function initDB(){
     return sortBy(x, 'timeStamp')
   }
 
-  function sortBy<T>(arr: T[], prop:keyof T, reverse:boolean=false){
+  export function sortBy<T>(arr: T[], prop:keyof T, reverse:boolean=false){
     const sortMod = reverse ? -1 : 1
     const sort = (a: unknown, b: unknown) => {
       return a[prop] < b[prop] ? -1 * sortMod

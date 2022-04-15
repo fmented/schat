@@ -9,7 +9,7 @@ export const getSession: GetSession = async function (event) {
     }
     const user = await getCurrentUser(request)    
     const session = await getUserDetail(user)
-    if(!session) return {user:null, bio:null, avatar:null, nickname:null}
+    if(!session || !user) return {user:null, bio:null, avatar:null, nickname:null}
     return {...session, user}
 }
 

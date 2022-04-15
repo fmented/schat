@@ -1,7 +1,6 @@
 <script lang="ts">
-import { sendRequest, SWContainerBridge } from "utils";
-import type { SWContainerBridge as SWCType } from "utils";
-import { onMount, createEventDispatcher} from 'svelte';
+import { sendRequest } from "utils";
+import { createEventDispatcher} from 'svelte';
 import {PUBLIC_KEY} from '$lib/secrets'
 import {API_URL} from 'interfaces'
 import {v4} from 'uuid'
@@ -9,11 +8,8 @@ import {v4} from 'uuid'
 const dt = Date.now();
 
 let nickname = `user-${dt}`;
-let s:SWCType
 const d = createEventDispatcher()
-onMount(()=>{
-    s= new SWContainerBridge(navigator.serviceWorker)
-})
+
 
 let process= false
 

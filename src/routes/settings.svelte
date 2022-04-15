@@ -16,7 +16,6 @@
     import {session} from '$app/stores'
     import {sendRequest, randAva} from 'utils'
     import {API_URL} from 'interfaces'
-    import {initDB} from 'utils/helper'
     import Head from 'components/Head.svelte'
 
 let avatar = ''

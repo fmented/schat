@@ -21,6 +21,8 @@ export async function open() {
 }
 
 export async function close(){
+    // opening and closing connection is ineffecient in mongoose
+    // this is just mock implementation
     return
 }
 

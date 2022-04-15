@@ -99,6 +99,7 @@ s.on('before_unsubscribe',  async()=>{
     if(sub) {
         await sub.unsubscribe()
         if(db) {
+            await db.open()
             await db.tables.conv.clear()
             await db.delete()
         }

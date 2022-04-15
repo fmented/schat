@@ -2,7 +2,7 @@
 import { onMount } from 'svelte';
 import type { Database } from 'idb';
 import type { Conversation} from 'interfaces';
-import {initDB} from 'utils/helper'
+import {initDB, sortBy} from 'utils/helper'
 import Message from 'components/Message.svelte';
 
 
@@ -27,6 +27,8 @@ import Message from 'components/Message.svelte';
 <svelte:head>
 		<link rel="manifest" href="/manifest.json">
 </svelte:head>
+<svelte:window bind:scrollY={h} />
+
 {#if conversation}
     
 <div class="wrap">
@@ -78,7 +80,7 @@ import Message from 'components/Message.svelte';
     {#if !conversation.chat.length}
       <div>{process ? "Please Wait" : "No Chat Data"}</div>
     {:else}
-      {#each conversation.chat || [] as chat}
+      {#each sortBy(conversation.chat || [], 'timeStamp') as chat}
         <Message message={chat} />
       {/each}
     {/if}

@@ -22,6 +22,7 @@ import SubscribtionForm from "components/SubscribtionForm.svelte"
 </div>
 <SubscribtionForm on:subscribed={()=>window.location.href="/chat"}/>
 
+    <small><em>before you subscribe we encourage you to read more in <a href="/about">about</a> page.</em></small>
 <style>
     div:first-of-type{
         background-color: blueviolet;

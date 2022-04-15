@@ -11,6 +11,7 @@
     initDB,
     updateMessageStatus,
     sendMessage as send,
+    sortBy
   } from "utils/helper";
 
   export let user: string;
@@ -39,6 +40,7 @@
           const conv = await db.tables.conv.findOne({ with: user });
           await conv.update({
             chat: updateMessageStatus(conv.chat, "seen", chats),
+            alias:nickname, thumbnail:avatar
           });
         }
       }
@@ -132,7 +134,7 @@
     {#if !conversation.length}
       <div>{loading ? "Please Wait" : "No Chat Data"}</div>
     {:else}
-      {#each conversation as chat}
+      {#each sortBy(conversation, 'timeStamp') as chat}
         <Message message={chat} />
       {/each}
     {/if}

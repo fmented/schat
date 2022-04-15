@@ -4,6 +4,7 @@ import type { Database } from 'idb';
 import type { Conversation} from 'interfaces';
 import {initDB, sortBy} from 'utils/helper'
 import Message from 'components/Message.svelte';
+import Skeleton from '$lib/components/Skeleton.svelte';
 
 
     export let u:string
@@ -25,27 +26,26 @@ import Message from 'components/Message.svelte';
 </script>
 
 <svelte:head>
-		<link rel="manifest" href="/manifest.json">
-</svelte:head>
-<svelte:window bind:scrollY={h} />
-
-{#if conversation}
-    
-<div class="wrap">
+		<link rel="manifest" href="/manifest.webmanifest">
+  </svelte:head>
+  <svelte:window bind:scrollY={h} />
+  
+  <Skeleton>
+    {#if conversation}
     <div class="header">
       <strong
-        ><a href="/chat" aria-label="back" >
-          <svg
-            height="30px"
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            version="1.1"
-            id="Layer_1"
-            x="0px"
-            y="0px"
-            viewBox="0 0 300.003 300.003"
-            style="enable-background:new 0 0 300.003 300.003;"
-            xml:space="preserve"
+      ><a href="/chat" aria-label="back" >
+        <svg
+        height="30px"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        version="1.1"
+        id="Layer_1"
+        x="0px"
+        y="0px"
+        viewBox="0 0 300.003 300.003"
+        style="enable-background:new 0 0 300.003 300.003;"
+        xml:space="preserve"
           >
             <g>
               <g>
@@ -75,19 +75,22 @@ import Message from 'components/Message.svelte';
       <strong class="username">{conversation.alias}</strong>
       <img src={conversation.thumbnail} alt={conversation.alias} height="30" width="30" />
     </div>
-
-  <div class="chat" bind:clientHeight={h}>
-    {#if !conversation.chat.length}
-      <div>{process ? "Please Wait" : "No Chat Data"}</div>
-    {:else}
-      {#each sortBy(conversation.chat || [], 'timeStamp') as chat}
-        <Message message={chat} />
-      {/each}
+    <div class="wrap">
+      <div class="chat" bind:clientHeight={h}>
+        {#if !conversation.chat.length}
+          <div>{process ? "Please Wait" : "No Chat Data"}</div>
+        {:else}
+          {#each sortBy(conversation.chat || [], 'timeStamp') as chat}
+            <Message message={chat} />
+          {/each}
+        {/if}
+      </div>
+    </div>
     {/if}
-  </div>
-</div>
+  </Skeleton>
+  
 
-{/if}
+
 
 <style>
 
@@ -95,10 +98,6 @@ import Message from 'components/Message.svelte';
     display: flex;
     height: 60px;
     padding: 0.25rem 1rem;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     align-items: center;
     background: blueviolet;
     z-index: 1;
@@ -116,16 +115,12 @@ import Message from 'components/Message.svelte';
     flex-grow: 1;
   }
 
-  .header + * {
-    margin-top: calc(100px + 0.5rem);
-  }
 
   .chat {
-    padding-bottom: 6.5rem;
     display: flex;
     flex-direction: column;
     position: relative;
-    min-height: calc(100vh - 220px);
+    padding-inline: .5rem;
   }
 
   .chat div {

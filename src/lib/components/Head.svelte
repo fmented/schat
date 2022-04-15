@@ -60,10 +60,6 @@
         padding: .5rem .5rem;
         background-color: blueviolet;
         color: white;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
         align-items: center;
         font-size: 1.4rem;
     }

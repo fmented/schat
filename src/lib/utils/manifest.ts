@@ -1,10 +1,10 @@
 export default {
-    name: "simplechat",
+    name: "Simple Chat",
     short_name: "schat",
     start_url: ".",
     display: "standalone",
     background_color: "#fff",
-    description: "simple distributed chat app.",
+    description: "simple progressve semi-distributed chat app.",
     theme_color: "#fff",
     icons: [
         {

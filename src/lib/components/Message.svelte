@@ -7,7 +7,13 @@
     function parseDate(timeStamp:number) {
         const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
         const d = new Date(timeStamp)
-        return `${d.getDate()} ${months[d.getMonth()]} @ ${d.getHours()}:${d.getMinutes()}`
+        return `${d.getDate()} ${months[d.getMonth()]} @ ${twoDigits(d.getHours())}:${twoDigits(d.getMinutes())}`
+    }
+
+    function twoDigits(n:number){
+        const str = `${n}`
+        if(str.length===1) return `0${str}`
+        return str
     }
 </script>
 
@@ -37,7 +43,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    margin-bottom: .25rem;
+    margin-bottom: .5rem;
 }
 
 .wrap.right{
@@ -47,11 +53,15 @@
 .msg{
     display: grid;
     grid-template-rows: 1fr auto;
-    background-color: aquamarine;
+    background-color: wheat;
     max-width: 70%;
     padding: 0 .5rem;
     border-radius: .25rem;
     overflow: hidden;
+}
+
+.right .msg{
+    background-color: aquamarine;
 }
 
 img{

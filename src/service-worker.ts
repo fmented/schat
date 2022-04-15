@@ -62,22 +62,22 @@ worker.addEventListener('fetch', (event) => {
 	const skipBecauseUncached = event.request.cache === 'only-if-cached' && !isStaticAsset;
 
 	if (isHttp && !isDevServerRequest && !skipBecauseUncached) {
-        if(event.request.url.endsWith('/manifest.json') && db){
-            return event.waitUntil(async () =>{
+        
+        if(event.request.url.endsWith('/manifest.webmanifest') && db){
+            event.respondWith((async () =>{                
                 await db.open()
                 const shortcuts = await Promise.all(
                     await db.tables.conv.retrieve(async c=>{
-                        return {name:c.alias, url:`/chat/${c.with}`, icons:[{src:c.thumbnail, sizes:'185x185', type:'image/png'}]}
+                        return {name:`chat with ${c.alias}`, short_name: `text ${c.alias}`,  url:`/chat/${c.with}`, icons:[{src:c.thumbnail, sizes:'185x185', type:'image/png'}]}
                     }, {direction:'prev'})
                 )
                 await db.close()
                 if(shortcuts.length > 3) shortcuts.slice(0, 3)
-                event.respondWith(
-                    new Response(JSON.stringify({...manifest, shortcuts:[...manifest.shortcuts, ...shortcuts]}))
-                )
-            })
+                return new Response(JSON.stringify({...manifest, shortcuts:[...shortcuts, ...manifest.shortcuts]}))
+                
+            })())
         }
-		event.respondWith(
+        else event.respondWith(
 			(async () => {
 				const cachedAsset = isStaticAsset && (await caches.match(event.request));
 				return cachedAsset || fetchAndCache(event.request);
@@ -106,6 +106,13 @@ s.on('before_unsubscribe',  async()=>{
         db=undefined
     }
     await s.emit('unsubscribed')
+})
+
+s.on('read', async tag=>{
+    const n = await sw.registration.getNotifications({tag})
+    if(n && n.length){
+        close(n[0])
+    }
 })
 
 
@@ -162,18 +169,37 @@ s.on('message_new', async msg=>{
             renotify: false,
             vibrate: [100, 200, 300, 200, 100, 200, 300],
             timestamp: msg.timeStamp,
-            badge:'/favicon-32x32.png'
+            badge:'/favicon-32x32.png',
+            actions: [
+                {action:'close', title:'Close'},
+                {action:'open', title:'Open'}
+            ]
         })
 
 })
 
-sw.addEventListener('notificationclick', e=>{
-    tags.delete(e.notification.tag)
-    e.notification.close()
-    sw.clients.openWindow(`/chat/${e.notification.tag}`)
+
+function open(n:NotificationEvent['notification']) {
+    tags.delete(n.tag)
+    n.close()
+    sw.clients.openWindow(`/chat/${n.tag}`)
+}
+
+function close(n:NotificationEvent['notification']) {
+    tags.delete(n.tag)
+    n.close()
+}
+
+sw.addEventListener('notificationclick', async e=>{
+    if(e.action === 'open'){
+        return open(e.notification)
+    }
+    if(e.action === 'close'){
+        return close(e.notification)
+    }
+    return open(e.notification)    
 })
 
 sw.addEventListener('notificationclose', e=>{
-    tags.delete(e.notification.tag)
-    e.notification.close()
+    close(e.notification)
 })

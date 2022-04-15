@@ -17,6 +17,7 @@
     import {sendRequest, randAva} from 'utils'
     import {API_URL} from 'interfaces'
     import Head from 'components/Head.svelte'
+import Skeleton from '$lib/components/Skeleton.svelte'
 
 let avatar = ''
 let bio = $session.bio
@@ -46,18 +47,20 @@ async function logout() {
 
 </script>
 <svelte:head>
-		<link rel="manifest" href="/manifest.json">
+		<link rel="manifest" href="/manifest.webmanifest">
 </svelte:head>
 <Head/>
 
-<main>
+
+<Skeleton>
     <div class="ava">
         <label for="pic">Pic</label>
-        <img src={avatar?avatar:$session.avatar} alt="user profile" on:click="{()=> {if(!process) avatar=randAva()}}">
+        <img src={avatar?avatar:$session.avatar} alt="user profile" on:click="{()=> {if(!process) process=true;avatar=randAva()}}" on:load="{()=>process=false}">
         {#if avatar}
             <span on:click="{()=>{avatar=''}}">❌</span>
         {/if}
     </div>
+    <div class="wrap">
     <div class="bio">
         <label for="nickname">Nickname</label>
         <input id="nickname" bind:value={nickname} disabled={process}>
@@ -65,15 +68,20 @@ async function logout() {
         <textarea id="" rows="6" bind:value={bio} disabled={process}></textarea>
         <button on:click="{save}" disabled={process}>Save</button>
     </div>
-    <hr>
-    <button on:click="{logout}" disabled={process}>Logout</button>
+
+        <hr>
+        <button on:click="{logout}" disabled={process} style="background-color: red;">Logout</button>
+    </div>
+    
+</Skeleton>
+<main>
 </main>
 
 <style>
 
-    main{
-        margin-top: 100px;
-    }
+:global(button:disabled){
+    filter: saturate(.5);
+}
     label {
         width: 100%;
     }
@@ -85,10 +93,11 @@ async function logout() {
         visibility: collapse;
     }
 
-    main .ava{
+    .ava{
         max-width: min(50%, 300px);
         position: relative;
         margin: auto;
+        margin-top: 2rem;
     }
 
     img{
@@ -98,8 +107,9 @@ async function logout() {
 
     span{
         position: absolute;
-        right: 1rem;
-        top: 1rem
+        right: -1.5rem;
+        top: -1.5rem;
+        cursor: pointer;
     }
 
     .bio{
@@ -116,10 +126,10 @@ async function logout() {
         border-radius: 4px;
     }
 
-    hr{
-        margin: 2rem;
-    }
 
+    .wrap{
+        padding: .5rem;
+    }
     textarea{
         border-radius: 4px;
         resize: none;

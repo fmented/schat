@@ -13,7 +13,7 @@
     }
 </script>
 <svelte:head>
-		<link rel="manifest" href="/manifest.json">
+		<link rel="manifest" href="/manifest.webmanifest">
 </svelte:head>
 <Head/>
 <SearchForm/>

@@ -52,7 +52,8 @@ export type PostMessageEventMap = {
     open:string
     update: string,
     before_unsubscribe: undefined,
-    unsubscribed: undefined
+    unsubscribed: undefined,
+    read: string
 }
 
 export type SWEventMap = PostMessageEventMap & PushEventMap

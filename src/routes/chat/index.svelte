@@ -19,6 +19,7 @@
     import {initDB, sortBy} from 'utils/helper'
     import type { Database } from "idb";
     import Head from 'components/Head.svelte'
+import Skeleton from "components/Skeleton.svelte";
 
 
     let db:Database<{conv:Conversation}>
@@ -42,24 +43,28 @@
 </script>
 
 <svelte:head>
-		<link rel="manifest" href="/manifest.json">
+		<link rel="manifest" href="/manifest.webmanifest">
 </svelte:head>
 
-<Head>
-schat
-</Head>
 
-<div class="conv">
-    {#if !conversation.length}
-    <div class="chat">{loading? 'Loading Data': 'No Conversation'}</div>
-       {:else} 
-        {#each conversation as c}
-        <a href="/chat/{c.with}/" >
-            <ListItem img={c.thumbnail} text={{strong:c.alias, small:c.content}}/>
-        </a>
-        {/each}
-    {/if}
-</div>
+<Skeleton>
+    <Head>
+    schat
+    </Head>
+
+    <div class="conv">
+        {#if !conversation.length}
+        <div class="chat">{loading? 'Loading Data': 'No Conversation'}</div>
+           {:else} 
+            {#each conversation as c}
+            <a href="/chat/{c.with}/" >
+                <ListItem img={c.thumbnail} text={{strong:c.alias, small:c.content}}/>
+            </a>
+            {/each}
+        {/if}
+    </div>
+</Skeleton>
+
     
 <style>
     a{
@@ -67,9 +72,8 @@ schat
         color: inherit;
     }
     .conv{
-        margin-top: calc(50px + 1.25rem);
         position: relative;
-        min-height: calc(100vh - 100px);
+        padding-inline: .5rem;
     }
 
     .chat{

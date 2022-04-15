@@ -18,6 +18,15 @@
     <p>it means that you can chat with your friends without having to install any app, but since it's a progessive web app it's recommended to install it so the service worker can run as expected in the background.  </p>
 </details>
 
+
+<details>
+    <summary>
+        What does subscribe mean?
+    </summary>
+    <p>it means we will collect a few required data like endpoint end public key for web push to work.</p>
+</details>
+
+
 <details>
     <summary>
         What about my chat data?
@@ -42,6 +51,7 @@
     </summary>
     <p>we will clear your chat data and you will be logged out. your data cannot be recovered.</p>
 </details>
+
 
 <style>
     

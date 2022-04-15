@@ -13,6 +13,7 @@
     sendMessage as send,
     sortBy
   } from "utils/helper";
+import Skeleton from "$lib/components/Skeleton.svelte";
 
   export let user: string;
   export let avatar: string;
@@ -48,17 +49,27 @@
     conversation = conv
       ? (await db.tables.conv.findOne({ with: user })).chat
       : [];
+    await s.emit('read', user)
+
   }
 
+
+
   onMount(async () => {
+    s = new SWContainerBridge(navigator.serviceWorker);
     db = initDB();
     await db.open();
     await markasread();
-    s = new SWContainerBridge(navigator.serviceWorker);
     s.on("update", async (u) => {
       if (!db) return;
       if (u === user && window.location.href.endsWith(user)) {
-        await markasread();
+        if(document.visibilityState === 'visible') return await markasread();
+        document.onvisibilitychange = async ()=>{
+          if(document.visibilityState==='visible'){
+            await markasread()
+            document.onvisibilitychange = null
+          }
+        }
       }
     });
     loading = false;
@@ -80,12 +91,19 @@
     process = false;
   }
 
-  let h: number;
+
+  let wrap: HTMLElement
+  let h: number
+
+  $: wrap && (()=>wrap.scrollTop = h)()
+  
 </script>
 
-<svelte:window bind:scrollY={h} />
+<svelte:head>
+		<link rel="manifest" href="/manifest.webmanifest">
+</svelte:head>
 
-<div class="wrap">
+<Skeleton>
   <div class="header">
     <strong
       ><a href="/chat" aria-label="back">
@@ -130,14 +148,16 @@
     <img src={avatar} alt={user} height="30" width="30" />
   </div>
 
-  <div class="chat" bind:clientHeight={h}>
-    {#if !conversation.length}
-      <div>{loading ? "Please Wait" : "No Chat Data"}</div>
-    {:else}
-      {#each sortBy(conversation, 'timeStamp') as chat}
-        <Message message={chat} />
-      {/each}
-    {/if}
+  <div style="position: relative; overflow-y: scroll;" bind:this="{wrap}">
+    <div class="chat" bind:clientHeight="{h}">
+      {#if !conversation.length}
+        <div>{loading ? "Please Wait" : "No Chat Data"}</div>
+      {:else}
+        {#each sortBy(conversation, 'timeStamp') as chat}
+          <Message message={chat} />
+        {/each}
+      {/if}
+    </div>
   </div>
 
   <div class="form">
@@ -201,7 +221,9 @@
       </svg>
     </div>
   </div>
-</div>
+</Skeleton>
+
+
 
 <style>
   label {
@@ -218,10 +240,6 @@
     display: flex;
     height: 60px;
     padding: 0.25rem 1rem;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     align-items: center;
     background: blueviolet;
     z-index: 1;
@@ -237,10 +255,6 @@
 
   .header .username {
     flex-grow: 1;
-  }
-
-  .header + * {
-    margin-top: calc(100px + 0.5rem);
   }
 
   textarea {
@@ -269,11 +283,10 @@
   }
 
   .chat {
-    padding-bottom: 6.5rem;
     display: flex;
     flex-direction: column;
     position: relative;
-    min-height: calc(100vh - 220px);
+    padding-inline: .5rem;
   }
 
   .chat div {
@@ -285,10 +298,6 @@
 
   .form {
     background-color: blueviolet;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
     padding: 0 0.5rem;
   }
 </style>

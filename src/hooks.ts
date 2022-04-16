@@ -1,16 +1,18 @@
 import type {GetSession, Handle} from '@sveltejs/kit' 
 import {isAuthenticated, getCurrentUser, getUserDetail} from 'auth'
+import cookie from 'cookie'
 
 export const getSession: GetSession = async function (event) {
-    const {request} = event
-    const auth = await isAuthenticated(request)
-    if(!auth) {
+    const {request, params} = event
+    const auth = isAuthenticated(request)
+    if(!auth) return {user:null, bio:null, avatar:null, nickname:null}
+    const x = await getCurrentUser(request)
+    try {
+        const s = await getUserDetail(x)
+        return {user:x, ...s}
+    } catch (error) {
         return {user:null, bio:null, avatar:null, nickname:null}
     }
-    const user = await getCurrentUser(request)    
-    const session = await getUserDetail(user)
-    if(!session || !user) return {user:null, bio:null, avatar:null, nickname:null}
-    return {...session, user}
 }
 
 export const handle:Handle = async function ({event, resolve}) {

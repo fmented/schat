@@ -14,7 +14,7 @@ export async function subscribe(sub:SubscribtionSchemaType){
 }
 
 export function setToken(token:string){
-    return cookie.serialize('token', token, {httpOnly:true, maxAge:28*24*60*60*1000, path:'/'})
+    return cookie.serialize('token', token, {httpOnly:true, maxAge:28*24*60*60, path:'/'})
 }
 
 export function invalidateToken(token:string){
@@ -72,8 +72,10 @@ export async function isAuthenticated(request:Request){
     const c = request.headers.get('cookie')||''
     const cookies = cookie.parse(c)
     if(!('token' in cookies)) return false
-    const validToken = isTokenValid(cookies.token)
-    if(!validToken) return false
+    const validToken = await isTokenValid(cookies.token)
+    const cur = await getCurrentUser(request)
+    if(!validToken || !cur) return false
+    if(!(await isUserExist(cur))) return false
     return true
 }
 
@@ -88,11 +90,13 @@ export async function getSubscribtion(deviceId:string) {
 export async function getCurrentUser(request:Request):Promise<string|null> {
     const c = request.headers.get('cookie') || ''
     const cookies = cookie.parse(c)
-    const auth = await isAuthenticated(request)
-    if(!auth) return null
     const token = cookies.token
-    const t = jwt.verify(token, JWT_SECRET) as JwtPayload & SubscribtionSchemaType
-    return t.deviceId as string
+    try {
+        const t = jwt.verify(token, JWT_SECRET) as JwtPayload & SubscribtionSchemaType
+        return t.deviceId as string
+    } catch (error) {
+        return null
+    }
 }
 
 export async function findUser(q:string) {

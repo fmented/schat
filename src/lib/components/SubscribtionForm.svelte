@@ -48,6 +48,7 @@ async function onClick(){
         display: flex;
         flex-direction: column;
         gap: .25rem;
+        padding: .5rem;
     }
 
     button{

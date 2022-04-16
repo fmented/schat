@@ -18,18 +18,21 @@
     }
 </script>
 
-<div class="sd">
-    <label for="search">Search</label>
-    <input type="search" id="search" bind:value="{q}" disabled={process}>
-    <button on:click="{search}" disabled={process}>Search</button>
-</div>
-
 <div>
-    {#each people as person}
-    <a href="/chat/{person.id}">
-        <ListItem img={person.avatar} text={{small:person.bio, strong:person.nickname}} />
-    </a>
-    {/each}
+
+    <div class="sd">
+        <label for="search">Search</label>
+        <input type="search" id="search" bind:value="{q}" disabled={process}>
+        <button on:click="{search}" disabled={process}>Search</button>
+    </div>
+    
+    <div class="s">
+        {#each people as person}
+        <a href="/chat/{person.id}">
+            <ListItem img={person.avatar} text={{small:person.bio, strong:person.nickname}} />
+        </a>
+        {/each}
+    </div>
 </div>
 <style>
     label{
@@ -53,11 +56,8 @@
         display: flex;
         justify-content: space-between;
         background-color: blueviolet;
-        position: fixed;
-        top: 50px;
-        left: 0;
-        right: 0;
-        height: 40px;
+        margin-top: -.5rem;
+        height: 60px;
         padding: 1rem .25rem;
     }
 
@@ -69,7 +69,7 @@
         font-size: 1.2rem;
     }
 
-    div:not(.sd){
-        margin-top: calc(100px + 1.5rem);
+    .s{
+        padding: .5rem;
     }
 </style>

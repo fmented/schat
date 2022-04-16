@@ -41,7 +41,7 @@
     ></small
   >
   {:else}
-  <h1>Your browser doesn't support a few API that we need to make this app work</h1>
+  <h1>Your browser doesn't support a few API that we need to make this app work. <a href="/about">learn more</a></h1>
 {/if}
 
 <style>
@@ -49,9 +49,11 @@
     background-color: blueviolet;
     color: white;
     padding: 1rem 0.5rem;
-    margin-inline: -0.5rem;
-    margin-top: -0.5rem;
     margin-bottom: 0.5rem;
     font-size: 1.4rem;
+  }
+
+  small{
+      padding: .5rem;
   }
 </style>

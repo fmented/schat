@@ -5,10 +5,24 @@ import cookie from 'cookie'
 export const post:RequestHandler= async function ({request}) {
     const user = await getCurrentUser(request)
     if (user) await unsubscribe({deviceId:user})
-    const cookies = cookie.parse(request.headers.get('cookie')||'')
-    return {
+    const cookies = cookie.parse(request.headers.get('cookie')||'')    
+    return cookies.token? {
         headers:{
             'set-cookie': invalidateToken(cookies.token),
-        }
+        },
+    }: {
+        headers:{location: '/'},
+        status:301
     }
+}
+
+export const get:RequestHandler= async function ({request}) {
+    const user = await getCurrentUser(request)
+    if (user) await unsubscribe({deviceId:user})
+    const cookies = cookie.parse(request.headers.get('cookie')||'')
+    return cookies.token? {
+        headers:{
+            'set-cookie': invalidateToken(cookies.token),
+        }}: {
+        headers:{location: '/'}, status:301}
 }

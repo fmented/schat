@@ -64,7 +64,8 @@ worker.addEventListener('fetch', (event) => {
 	if (isHttp && !isDevServerRequest && !skipBecauseUncached) {
         
         if(event.request.url.endsWith('/manifest.webmanifest') && db){
-            event.respondWith((async () =>{                
+            event.respondWith((async () =>{   
+                if(!db) return new Response(JSON.stringify(manifest))             
                 await db.open()
                 const shortcuts = await Promise.all(
                     await db.tables.conv.retrieve(async c=>{
@@ -77,12 +78,12 @@ worker.addEventListener('fetch', (event) => {
                 
             })())
         }
-        else event.respondWith(
-			(async () => {
-				const cachedAsset = isStaticAsset && (await caches.match(event.request));
-				return cachedAsset || fetchAndCache(event.request);
-			})()
-		);
+        else{
+            event.respondWith((async ()=>{
+                const asset = isStaticAsset && (await caches.match(event.request))
+                return asset || fetchAndCache(event.request)
+            })())
+        }
 	}
 });
 
@@ -94,27 +95,20 @@ const tags = new Map()
 const s = new SWBridge(sw)
 
 
-s.on('before_unsubscribe',  async()=>{
-    const sub = await sw.registration.pushManager.getSubscription()    
-    if(sub) {
-        await sub.unsubscribe()
-        if(db) {
-            await db.open()
-            await db.tables.conv.clear()
-            await db.delete()
-        }
-        db=undefined
-    }
-    await s.emit('unsubscribed')
-})
-
 s.on('read', async tag=>{
     const n = await sw.registration.getNotifications({tag})
     if(n && n.length){
         close(n[0])
     }
 })
-
+s.on('before_unsubscribe', async ()=>{
+    if(!db) return await s.emit('unsubscribed')
+    const sub = await sw.registration.pushManager.getSubscription()
+    if(sub) sub.unsubscribe()
+    await db.open()
+    await db.tables.conv.clear()
+    await s.emit('unsubscribed')
+})
 
 s.on('message_seen', async ({id, deviceId})=>{
     if(!db) return

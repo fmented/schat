@@ -12,17 +12,28 @@
 </script>
 
 <script lang="ts">
-    import {SWContainerBridge} from 'utils/bridge'
     import {session} from '$app/stores'
     import {sendRequest, randAva} from 'utils'
+    import type {SWContainerBridge} from 'utils/bridge'
+    import {SWContainerBridge as sw} from 'utils/bridge'
     import {API_URL} from 'interfaces'
     import Head from 'components/Head.svelte'
 import Skeleton from '$lib/components/Skeleton.svelte'
+import { onMount } from 'svelte';
 
 let avatar = ''
 let bio = $session.bio
 let nickname = $session.nickname
 let process = false
+let s:SWContainerBridge
+onMount(()=>{
+    s = new sw(navigator.serviceWorker)
+    s.on('unsubscribed', async ()=>{
+        await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)
+        process = false
+        window.location.href = '/'
+    })
+})
 
 async function save(){
     process = true
@@ -34,23 +45,17 @@ async function save(){
 
 async function logout() {
     process = true
-    const b = new SWContainerBridge(navigator.serviceWorker)
-    await b.emit('before_unsubscribe', undefined)
-    b.on('unsubscribed', async ()=>{
-    await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)        
-        
-        process = false
-        window.location.href = '/'
-    })
+    await s.emit('before_unsubscribe', undefined)
+    
 }
 
+let l:HTMLElement
 
 </script>
 <svelte:head>
 		<link rel="manifest" href="/manifest.webmanifest">
 </svelte:head>
 <Head/>
-
 
 <Skeleton>
     <div class="ava">
@@ -78,7 +83,6 @@ async function logout() {
 </main>
 
 <style>
-
 :global(button:disabled){
     filter: saturate(.5);
 }

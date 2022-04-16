@@ -2,6 +2,7 @@
     import Head from 'components/Head.svelte';
     import type {Load} from '@sveltejs/kit'
     import SearchForm from 'components/SearchForm.svelte'
+import Skeleton from '$lib/components/Skeleton.svelte';
     export const load:Load = async ({session}) => {
         if(!session.user){
             return {
@@ -15,5 +16,7 @@
 <svelte:head>
 		<link rel="manifest" href="/manifest.webmanifest">
 </svelte:head>
-<Head/>
-<SearchForm/>
+<Skeleton>
+    <Head/>
+    <SearchForm/>
+</Skeleton>

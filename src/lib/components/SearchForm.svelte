@@ -29,7 +29,7 @@ import Loading from "./Loading.svelte";
     
     <div class="s">
         {#each people as person}
-        <a href="/chat/{person.id}">
+        <a href="/chat/{person.id}" title="chat with {person.nickname}">
             <ListItem img={person.avatar} text={{small:person.bio, strong:person.nickname}} />
         </a>
         {/each}
@@ -69,6 +69,7 @@ import Loading from "./Loading.svelte";
         border-radius: 4px;
         color: white;
         font-size: 1.2rem;
+        cursor: pointer;
     }
 
     .s{

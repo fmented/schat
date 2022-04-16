@@ -64,8 +64,9 @@ worker.addEventListener('fetch', (event) => {
 	if (isHttp && !isDevServerRequest && !skipBecauseUncached) {
         
         if(event.request.url.endsWith('/manifest.webmanifest') && db){
-            event.respondWith((async () =>{   
-                if(!db) return new Response(JSON.stringify(manifest))             
+            const reset = event.request.referrer.endsWith('/');
+            event.respondWith((async () =>{  
+                if(!db || reset) return new Response(JSON.stringify(manifest))             
                 await db.open()
                 const shortcuts = await Promise.all(
                     await db.tables.conv.retrieve(async c=>{
@@ -78,7 +79,7 @@ worker.addEventListener('fetch', (event) => {
                 
             })())
         }
-        else{
+        else if(event.request.url.endsWith('png')){
             event.respondWith((async ()=>{
                 const asset = isStaticAsset && (await caches.match(event.request))
                 return asset || fetchAndCache(event.request)

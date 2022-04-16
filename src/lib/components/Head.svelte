@@ -1,7 +1,7 @@
 <div class="header">
     <strong>
         <slot>
-        <a href="/chat" aria-label="back" >
+        <a href="/chat" aria-label="back" title="back">
         <svg height="30px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 300.003 300.003" style="enable-background:new 0 0 300.003 300.003;" xml:space="preserve">
             <g>
                 <g>
@@ -43,8 +43,8 @@
 </slot>
 </strong>
     <div>
-        <a href="/settings" >Settings</a>
-        <a href="/search" >Search</a>
+        <a href="/settings" title="settings">Settings</a>
+        <a href="/search" title="search">Search</a>
     </div>
 </div>
 

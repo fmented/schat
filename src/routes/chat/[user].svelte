@@ -107,7 +107,7 @@ import Loading from "$lib/components/Loading.svelte";
 <Skeleton>
   <div class="header">
     <strong
-      ><a href="/chat" aria-label="back">
+      ><a href="/chat" aria-label="back" title="back">
         <svg
           height="30px"
           xmlns="http://www.w3.org/2000/svg"
@@ -146,7 +146,7 @@ import Loading from "$lib/components/Loading.svelte";
       </a></strong
     >
     <strong class="username">{nickname}</strong>
-    <img src={avatar} alt={user} height="30" width="30" />
+    <img src={avatar} alt="{nickname} avatar" height="30" width="30" />
   </div>
 
   <div style="position: relative; overflow-y: scroll; max-height: calc(100% - 5rem);" bind:this="{wrap}">
@@ -173,6 +173,7 @@ import Loading from "$lib/components/Loading.svelte";
         autocomplete="off"
         rows="3"
       />
+      <div title="send message">
       <svg
         id="Layer_1"
         xmlns="http://www.w3.org/2000/svg"
@@ -183,6 +184,8 @@ import Loading from "$lib/components/Loading.svelte";
         viewBox="0 0 481.882 481.882"
         style="enable-background:new 0 0 481.882 481.882;"
         xml:space="preserve"
+        aria-label="send message"
+        role="button"
       >
         <g>
           <g>
@@ -220,6 +223,8 @@ import Loading from "$lib/components/Loading.svelte";
         <g />
         <g />
       </svg>
+    </div>
+
     </div>
   </div>
 </Skeleton>
@@ -271,7 +276,7 @@ import Loading from "$lib/components/Loading.svelte";
     fill: white;
   }
 
-  .form div {
+  .form>div {
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -279,6 +284,7 @@ import Loading from "$lib/components/Loading.svelte";
     padding: .5rem 0.25rem;
     gap: 0.25rem;
   }
+
 
   .chat {
     display: flex;
@@ -302,5 +308,7 @@ import Loading from "$lib/components/Loading.svelte";
     height: 5rem;
     left: 0;
     right: 0;
+    display: grid;
+    place-items: center;
   }
 </style>

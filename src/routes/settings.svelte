@@ -69,9 +69,9 @@ async function logout() {
 
         <div class="ava">
             <label for="pic">Pic</label>
-            <img src={avatar?avatar:$session.avatar} alt="user profile" on:click="{()=> {if(!process) process=true;avatar=randAva()}}" on:load="{()=>process=false}">
+            <img src={avatar?avatar:$session.avatar} alt="user profile" on:click="{()=> {if(!process) process=true;avatar=randAva()}}" on:load="{()=>process=false}" title="click to change avatar">
             {#if avatar}
-            <span on:click="{()=>{avatar=''}}">❌</span>
+            <span on:click="{()=>{avatar=''}}" title="click to reset avatar">❌</span>
         {/if}
     </div>
     <div class="wrap">
@@ -115,6 +115,7 @@ async function logout() {
     img{
         max-width: 100%;
         height: auto;
+        cursor: pointer;
     }
 
     span{
@@ -137,6 +138,7 @@ async function logout() {
         background: blueviolet;
         border-radius: 4px;
         margin-block: .5rem;
+        cursor: pointer;
     }
 
 

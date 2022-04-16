@@ -8,14 +8,14 @@
     <summary>
         What is this?
     </summary>
-    <p>this is a simple chat app that uses combination of web technologies such as IndexedDB, Web Push, and Service Worker.</p>
+    <p>this is a simple chat app that's using the combination of web technologies such as IndexedDB, Web Push, and Service Worker.</p>
 </details>
 
 <details>
     <summary>
         What does it mean?
     </summary>
-    <p>it means that you can chat with your friends without having to install any app, but since it's a progessive web app it's recommended to install it so the service worker can run as expected in the background.  </p>
+    <p>it means that you can chat with your friends without having to install any app, but since it's a progessive web app you can install it too if you want.</p>
 </details>
 
 
@@ -48,7 +48,7 @@
 </details>
 
 <details>
-    <summary>Why the website asking for notification permission?</summary>
+    <summary>Why is the website asking for notification permission?</summary>
     <p>it is required by Web Push API.</p>
 </details>
 

@@ -60,6 +60,7 @@ async function onClick(){
         margin-top: .5rem;
         background: blueviolet;
         color: white;
+        cursor: pointer;
     }
 
     input, button{

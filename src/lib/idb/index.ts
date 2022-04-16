@@ -286,11 +286,15 @@ export class TableStore<T> {
   async delete($pk: number):Promise<void> {
     const tx = this.#tx()
     return new Promise((resolve, reject)=>{
-      const req = tx.objectStore(this.#name).delete($pk)
-      req.onsuccess = ()=>
-      req.onerror = e => reject(e)
-      tx.oncomplete = ()=> resolve()
+      const cursor = tx.objectStore(this.#name).openCursor($pk)
+      cursor.onsuccess = ()=> {
+        if(!cursor.result) return
+        cursor.result.delete()
+      }
+
+      cursor.onerror = e => reject(e)
       tx.onerror = e=> reject(e)
+      tx.oncomplete = _=>resolve()
     })
   }
 
@@ -304,6 +308,7 @@ export class TableStore<T> {
     return new Promise((resolve, reject)=>{
       const cursor = tx.objectStore(this.#name).openCursor($pk)
       cursor.onsuccess = ()=> {
+        if(!cursor.result) return
         cursor.result.update(data)
       }
 
@@ -372,9 +377,9 @@ export class TableStore<T> {
     return new CArray(...await Promise.all(toGet))
   }
 
-  all({index, direction}:CursorOption<T>={}):Promise<CArray<T & {$pk: number}>>{
+  all({index, direction}:CursorOption<T>={}):Promise<CArray<T & DataRecord<T>>>{
     const tx = this.#tx("readonly")
-    const values: CArray<T & {$pk: number}> = new CArray()
+    const values: CArray<T & DataRecord<T>> = new CArray()
     return new Promise((resolve, reject) => {
       const cursor = index
       ? tx.objectStore(this.#name).index(index as string).openCursor(null, direction) 
@@ -382,7 +387,12 @@ export class TableStore<T> {
       cursor.onsuccess = () => {
         const c = cursor.result
         if (c) {
-          values.push({...c.value, $pk:c.primaryKey})
+          values.push({
+            ...c.value, 
+            $pk:c.primaryKey,
+            delete: ()=>this.delete(c.primaryKey as number),
+            update: ()=> this.update(c.primaryKey as number, c.value)
+          })
           c.continue()
         }
       }

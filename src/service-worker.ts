@@ -102,16 +102,13 @@ s.on('read', async tag=>{
     }
 })
 s.on('before_unsubscribe', async ()=>{
-    if(!db) return await s.emit('unsubscribed')
+    if(!db) return
     const sub = await sw.registration.pushManager.getSubscription()
     if(sub) sub.unsubscribe()
     await db.open()
-    await db.tables.conv.clear()
-    const r = sw.indexedDB.deleteDatabase('schat-data')
-    r.onblocked = ()=>s.emit('unsubscribed')
-    r.onsuccess = ()=>s.emit('unsubscribed')
-    r.onerror = ()=>s.emit('unsubscribed')
-    db = undefined
+    const all = await db.tables.conv.all()
+    await Promise.all(all.map(async c=>{await c.delete()}))
+    await s.emit('unsubscribed')
 })
 
 s.on('message_seen', async ({id, deviceId})=>{

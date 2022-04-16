@@ -23,7 +23,7 @@
     <summary>
         What does subscribe mean?
     </summary>
-    <p>it means we will collect a few required data like endpoint end public key for web push to work.</p>
+    <p>it means we will collect a few required data like endpoint and public keys for web push to work.</p>
 </details>
 
 
@@ -76,8 +76,6 @@ div{
         background-color: blueviolet;
         color: white;
         padding: 1rem .5rem;
-        margin-inline: -.5rem;
-        margin-top: -.5rem;
         margin-bottom: .5rem;
         font-size: 1.4rem;
     }

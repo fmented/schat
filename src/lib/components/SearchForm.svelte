@@ -2,6 +2,7 @@
     import { sendRequest } from "utils";
     import {API_URL} from 'interfaces'
     import ListItem from './ListItem.svelte'
+import Loading from "./Loading.svelte";
 
     let people:{avatar:string, nickname:string, bio:string, id:string}[]=[]
     let q = ''
@@ -34,6 +35,8 @@
         {/each}
     </div>
 </div>
+
+<Loading show={process}/>
 <style>
     label{
         height: 0;
@@ -56,9 +59,8 @@
         display: flex;
         justify-content: space-between;
         background-color: blueviolet;
-        margin-top: -.5rem;
-        height: 60px;
         padding: 1rem .25rem;
+        margin-top: -.25rem;
     }
 
     button{

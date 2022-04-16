@@ -1,10 +1,10 @@
 import type {RequestHandler} from '@sveltejs/kit'
-import {isAuthenticated, isUserExist} from 'auth'
+import {authenticate, getUserDetail} from 'auth'
 
 export const get:RequestHandler = async function ({request, params}) {
-    const auth = await isAuthenticated(request)
+    const auth = await authenticate(request)
     if(!auth) return {status:403}
-    const exist = await isUserExist(params.user)    
+    const exist = await getUserDetail(params.user)    
     if(exist) return {status:301, headers:{'location': `/chat/${params.user}`}}
     return {body:{u:params.user}}
 }

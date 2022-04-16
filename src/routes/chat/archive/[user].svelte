@@ -5,6 +5,7 @@ import type { Conversation} from 'interfaces';
 import {initDB, sortBy} from 'utils/helper'
 import Message from 'components/Message.svelte';
 import Skeleton from '$lib/components/Skeleton.svelte';
+import Loading from '$lib/components/Loading.svelte';
 
 
     export let u:string
@@ -30,6 +31,8 @@ import Skeleton from '$lib/components/Skeleton.svelte';
   </svelte:head>
   <svelte:window bind:scrollY={h} />
   
+  <Loading show={process}/>
+
   <Skeleton>
     {#if conversation}
     <div class="header">

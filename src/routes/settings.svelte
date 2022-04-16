@@ -20,6 +20,7 @@
     import Head from 'components/Head.svelte'
 import Skeleton from '$lib/components/Skeleton.svelte'
 import { onMount } from 'svelte';
+import Loading from '$lib/components/Loading.svelte'
 
 let avatar = ''
 let bio = $session.bio
@@ -49,38 +50,36 @@ async function logout() {
     
 }
 
-let l:HTMLElement
-
 </script>
 <svelte:head>
 		<link rel="manifest" href="/manifest.webmanifest">
 </svelte:head>
-<Head/>
-
 <Skeleton>
-    <div class="ava">
-        <label for="pic">Pic</label>
-        <img src={avatar?avatar:$session.avatar} alt="user profile" on:click="{()=> {if(!process) process=true;avatar=randAva()}}" on:load="{()=>process=false}">
-        {#if avatar}
+    <Head/>
+    <div>
+
+        <div class="ava">
+            <label for="pic">Pic</label>
+            <img src={avatar?avatar:$session.avatar} alt="user profile" on:click="{()=> {if(!process) process=true;avatar=randAva()}}" on:load="{()=>process=false}">
+            {#if avatar}
             <span on:click="{()=>{avatar=''}}">❌</span>
         {/if}
     </div>
     <div class="wrap">
-    <div class="bio">
+        <div class="bio">
         <label for="nickname">Nickname</label>
         <input id="nickname" bind:value={nickname} disabled={process}>
         <label for="bio">Bio</label>
         <textarea id="" rows="6" bind:value={bio} disabled={process}></textarea>
         <button on:click="{save}" disabled={process}>Save</button>
     </div>
-
+    
         <hr>
         <button on:click="{logout}" disabled={process} style="background-color: red;">Logout</button>
     </div>
-    
+</div>
 </Skeleton>
-<main>
-</main>
+<Loading show={process}/>
 
 <style>
 :global(button:disabled){
@@ -128,6 +127,7 @@ let l:HTMLElement
         color: white;
         background: blueviolet;
         border-radius: 4px;
+        margin-block: .5rem;
     }
 
 

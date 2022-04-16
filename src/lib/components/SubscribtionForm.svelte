@@ -37,13 +37,16 @@ async function onClick(){
 </script>
 
 <div class="wrap">
-    <p>{process? 'Please Wait': ''}</p>
+    {#if process}
+    <p>Please Wait</p>
+    {/if}
     <label for="nickname">Nickname</label>
     <input type="text" id="nickname" bind:value="{nickname}">
     <button on:click|preventDefault={onClick} disabled={process}>Subscribe</button>
 </div>
 
 <style>
+    
     .wrap{
         display: flex;
         flex-direction: column;

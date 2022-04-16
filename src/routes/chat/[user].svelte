@@ -14,6 +14,7 @@
     sortBy
   } from "utils/helper";
 import Skeleton from "$lib/components/Skeleton.svelte";
+import Loading from "$lib/components/Loading.svelte";
 
   export let user: string;
   export let avatar: string;
@@ -170,7 +171,7 @@ import Skeleton from "$lib/components/Skeleton.svelte";
         bind:value={txt}
         disabled={process}
         autocomplete="off"
-        rows="2"
+        rows="3"
       />
       <svg
         id="Layer_1"
@@ -223,7 +224,7 @@ import Skeleton from "$lib/components/Skeleton.svelte";
   </div>
 </Skeleton>
 
-
+<Loading show={process||loading}/>
 
 <style>
   label {
@@ -258,7 +259,6 @@ import Skeleton from "$lib/components/Skeleton.svelte";
   }
 
   textarea {
-    height: calc(100% - 1rem);
     flex-grow: 1;
     border-radius: 4px;
     resize: none;
@@ -273,12 +273,10 @@ import Skeleton from "$lib/components/Skeleton.svelte";
 
   .form div {
     width: 100%;
-    height: 4rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem 0.25rem;
+    padding: .5rem 0.25rem;
     gap: 0.25rem;
   }
 

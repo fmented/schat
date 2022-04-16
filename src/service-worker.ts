@@ -98,7 +98,7 @@ const s = new SWBridge(sw)
 s.on('read', async tag=>{
     const n = await sw.registration.getNotifications({tag})
     if(n && n.length){
-        close(n[0])
+        return close(n[0])
     }
 })
 s.on('before_unsubscribe', async ()=>{
@@ -158,15 +158,14 @@ s.on('message_new', async msg=>{
     else tags.set(msg.from, 1)
     return await sw.registration.showNotification(msg.alias , {
             tag: msg.from, 
-            body: tags.get(msg.from)=== 1 ? msg.content: `${tags.get(msg.from)} unread messages`, 
+            body: tags.get(msg.from)=== 1 ? msg.content: `${tags.get(msg.from)} messages`, 
             icon : msg.thumbnail, 
-            renotify: false,
             vibrate: [100, 200, 300, 200, 100, 200, 300],
             timestamp: msg.timeStamp,
             badge:'/favicon-32x32.png',
             actions: [
+                {action:'open', title:'Open'},
                 {action:'close', title:'Close'},
-                {action:'open', title:'Open'}
             ]
         })
 
@@ -174,13 +173,13 @@ s.on('message_new', async msg=>{
 
 
 function open(n:NotificationEvent['notification']) {
-    tags.delete(n.tag)
+    if(tags.has(n.tag)) tags.delete(n.tag)
     n.close()
     sw.clients.openWindow(`/chat/${n.tag}`)
 }
 
 function close(n:NotificationEvent['notification']) {
-    tags.delete(n.tag)
+    if(tags.has(n.tag)) tags.delete(n.tag)
     n.close()
 }
 

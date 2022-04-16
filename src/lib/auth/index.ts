@@ -5,6 +5,21 @@ import type {JwtPayload} from 'jsonwebtoken'
 import type {SubscribtionSchemaType} from 'model'
 import { JWT_SECRET } from "$lib/secrets"
 
+export async function authenticate(r:Request){
+    const token = cookie.parse(r.headers.get('cookie') || '').token
+    if(!token) return null
+    try {
+        const payload = jwt.verify(token, JWT_SECRET) as JwtPayload
+        if(!payload?.deviceId) return null
+        const db = await open() 
+        const user = await db.Subscribtion.findOne({deviceId:payload.deviceId})
+        if(!user) return null
+        return {user:payload.deviceId, avatar:user.avatar, nickname:user.nickname, bio:user.bio, token}
+    } catch (error) {
+        return null
+    }
+}
+
 export async function subscribe(sub:SubscribtionSchemaType){
     const db = await open()
     await db.Subscribtion.create(sub)
@@ -27,31 +42,6 @@ export async function unsubscribe(u:{deviceId:string}){
     await close()
 }
 
-export async function isTokenValid(token:string){
-    try {
-        const t = jwt.verify(token, JWT_SECRET) as JwtPayload & SubscribtionSchemaType
-        if(!t.nickname || !t.deviceId) return false
-        const userExists = await isUserExist(t.nickname)
-        if(!userExists) return false
-        return true
-    } catch (err) {
-        return false
-    }
-}
-
-export async function isUserExist(deviceId:string){
-    try {
-        const db = await open()
-        const user = await db.Subscribtion.findOne({deviceId}).lean()
-        await close()
-        if(!user){
-            return false
-        }
-        return true
-    } catch (err) {
-        return false
-    }
-}
 
 export async function getUserDetail(deviceId:string):Promise<{bio:string, avatar:string, nickname:string}> {
 
@@ -60,25 +50,14 @@ export async function getUserDetail(deviceId:string):Promise<{bio:string, avatar
         const user = await db.Subscribtion.findOne({deviceId})
         await close()
         if(!user?.id){
-            throw new Error('user not found')
+            return null
         }
         return {bio:user.bio, avatar:user.avatar, nickname:user.nickname}
     } catch (e) {
-        throw e
+        console.log(e);
+        return null
     }
 }
-
-export async function isAuthenticated(request:Request){
-    const c = request.headers.get('cookie')||''
-    const cookies = cookie.parse(c)
-    if(!('token' in cookies)) return false
-    const validToken = await isTokenValid(cookies.token)
-    const cur = await getCurrentUser(request)
-    if(!validToken || !cur) return false
-    if(!(await isUserExist(cur))) return false
-    return true
-}
-
 
 export async function getSubscribtion(deviceId:string) {
     const db = await open()

@@ -1,28 +1,14 @@
 import type {RequestHandler} from '@sveltejs/kit'
-import {invalidateToken, getCurrentUser, unsubscribe} from 'auth'
-import cookie from 'cookie'
+import {authenticate, unsubscribe, invalidateToken} from 'auth'
 
 export const post:RequestHandler= async function ({request}) {
-    const user = await getCurrentUser(request)
-    if (user) await unsubscribe({deviceId:user})
-    const cookies = cookie.parse(request.headers.get('cookie')||'')    
-    return cookies.token? {
+    const auth = await authenticate(request)
+    if(!auth) return {status:403}
+    await unsubscribe({deviceId:auth.user})
+    return {
         headers:{
-            'set-cookie': invalidateToken(cookies.token),
+            'set-cookie': invalidateToken(auth.token),
         },
-    }: {
-        headers:{location: '/'},
-        status:301
     }
 }
 
-export const get:RequestHandler= async function ({request}) {
-    const user = await getCurrentUser(request)
-    if (user) await unsubscribe({deviceId:user})
-    const cookies = cookie.parse(request.headers.get('cookie')||'')
-    return cookies.token? {
-        headers:{
-            'set-cookie': invalidateToken(cookies.token),
-        }}: {
-        headers:{location: '/'}, status:301}
-}

@@ -20,6 +20,7 @@
     import type { Database } from "idb";
     import Head from 'components/Head.svelte'
 import Skeleton from "components/Skeleton.svelte";
+import Loading from "$lib/components/Loading.svelte";
 
 
     let db:Database<{conv:Conversation}>
@@ -45,7 +46,7 @@ import Skeleton from "components/Skeleton.svelte";
 <svelte:head>
 		<link rel="manifest" href="/manifest.webmanifest">
 </svelte:head>
-
+<Loading show={loading}/>
 
 <Skeleton>
     <Head>

@@ -1,20 +1,17 @@
 import type {RequestHandler} from '@sveltejs/kit'
 import type {FetchMap, API_URL} from 'interfaces'
-import {getCurrentUser, getSubscribtion, isAuthenticated} from 'auth'
+import { getSubscribtion, authenticate} from 'auth'
 import {sendPush} from 'utils/push'
 
 export const post:RequestHandler= async function ({request}) {
+    const auth = await authenticate(request)
+    if(!auth) return {status:403}
     const body = await request.json() as FetchMap[API_URL.MESSAGE_SEEN]
-    const auth = await isAuthenticated(request)
-    if(!auth) return {status:403};
-    const sub = await getSubscribtion(body.receiver)
-    const u = await getCurrentUser(request)
-    
+    const sub = await getSubscribtion(body.receiver)    
     try {
-        await sendPush(sub, {event:'message_seen', data:{id:body.id, deviceId:u}})
+        await sendPush(sub, {event:'message_seen', data:{id:body.id, deviceId:auth.user}})
     } catch (error) {
         console.log(error);
-        
     }
 
     return {}

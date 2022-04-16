@@ -149,7 +149,7 @@ import Loading from "$lib/components/Loading.svelte";
     <img src={avatar} alt={user} height="30" width="30" />
   </div>
 
-  <div style="position: relative; overflow-y: scroll;" bind:this="{wrap}">
+  <div style="position: relative; overflow-y: scroll; max-height: calc(100% - 4rem);" bind:this="{wrap}">
     <div class="chat" bind:clientHeight="{h}">
       {#if !conversation.length}
         <div>{loading ? "Please Wait" : "No Chat Data"}</div>
@@ -297,5 +297,10 @@ import Loading from "$lib/components/Loading.svelte";
   .form {
     background-color: blueviolet;
     padding: 0 0.5rem;
+    position: fixed;
+    bottom: 0; 
+    height: 4rem;
+    left: 0;
+    right: 0;
   }
 </style>

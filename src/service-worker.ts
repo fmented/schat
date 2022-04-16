@@ -107,7 +107,11 @@ s.on('before_unsubscribe', async ()=>{
     if(sub) sub.unsubscribe()
     await db.open()
     await db.tables.conv.clear()
-    await s.emit('unsubscribed')
+    const r = sw.indexedDB.deleteDatabase('schat-data')
+    r.onblocked = ()=>s.emit('unsubscribed')
+    r.onsuccess = ()=>s.emit('unsubscribed')
+    r.onerror = ()=>s.emit('unsubscribed')
+    db = undefined
 })
 
 s.on('message_seen', async ({id, deviceId})=>{

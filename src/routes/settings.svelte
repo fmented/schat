@@ -20,19 +20,28 @@
     import Head from 'components/Head.svelte'
 import Skeleton from '$lib/components/Skeleton.svelte'
 import { onMount } from 'svelte';
-import Loading from '$lib/components/Loading.svelte'
+import Loading from 'components/Loading.svelte'
+import { initDB } from 'utils/helper';
 
 let avatar = ''
 let bio = $session.bio
 let nickname = $session.nickname
 let process = false
 let s:SWContainerBridge
+
+
 onMount(()=>{
     s = new sw(navigator.serviceWorker)
     s.on('unsubscribed', async ()=>{
-        await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)
+        const db = initDB()
+        try {
+            await db.delete()
+            await sendRequest(API_URL.AUTH_UNSUBSCRIBE, undefined)
+            window.location.href = '/'
+        } catch (error) {
+            if(error === 'blocked') window.location.href = '/settings.forceclear'
+        }
         process = false
-        window.location.href = '/'
     })
 })
 

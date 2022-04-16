@@ -4,3 +4,6 @@
 - [x] implement browser level encryption
 - [x] secure mechanism for sync data
 - [x] better-looking UI
+- [x] browser-level encryption
+- [x] block feature
+- [x] rewrite cleaner idb adapter

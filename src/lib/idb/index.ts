@@ -518,14 +518,11 @@ export class Database<T>{
   }
 
   async delete():Promise<void> {
-    if(this.#db)
-    {
-      await this.close()
-    }
     return new Promise((resolve, reject)=>{
       const req = indexedDB.deleteDatabase(this.#name)
       req.onsuccess = ()=>resolve()
       req.onerror = e => reject(e)
+      req.onblocked = _=>reject('blocked')
     })
   }
 }

@@ -4,6 +4,7 @@ import { createEventDispatcher} from 'svelte';
 import {PUBLIC_KEY} from '$lib/secrets'
 import {API_URL} from 'interfaces'
 import {v4} from 'uuid'
+import Loading from "./Loading.svelte";
 
 const dt = Date.now();
 
@@ -36,6 +37,7 @@ async function onClick(){
     }
 </script>
 
+<Loading show={process}/>
 <div class="wrap">
     {#if process}
     <p>Please Wait</p>

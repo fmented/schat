@@ -105,9 +105,6 @@ s.on('before_unsubscribe', async ()=>{
     if(!db) return
     const sub = await sw.registration.pushManager.getSubscription()
     if(sub) sub.unsubscribe()
-    await db.open()
-    const all = await db.tables.conv.all()
-    await Promise.all(all.map(async c=>{await c.delete()}))
     await s.emit('unsubscribed')
 })
 

@@ -26,12 +26,25 @@
     <p>it means we will collect a few required data like endpoint and public keys for web push to work.</p>
 </details>
 
+<details>
+    <summary>
+        Do I need a unique nickname?
+    </summary>
+    <p>No. nickname is only used so that other people can find your account, but make sure it's unique enough so your account can be found easily</p>
+</details>
 
 <details>
     <summary>
         What about my chat data?
     </summary>
     <p>it is stored in your device.</p>
+</details>
+
+<details>
+    <summary>
+        Is my local chat data encrypted?
+    </summary>
+    <p>No. you can view it directly in your devtools. however, during sending process it will be encrypted as it is part of web push standards.</p>
 </details>
 
 <details>
@@ -42,7 +55,7 @@
 <details>
     <summary>Why my device is making request in the background?
     </summary>
-    <p>we use service worker to get the incoming message and it will make request in the background to notify the sender that the message has been delivered. </p>
+    <p>we use service worker to receive the incoming message and it will make request in the background to notify the sender that the message has been delivered. </p>
 </details>
 
 <details>
@@ -65,6 +78,7 @@ p{
 
 summary{
     font-weight: 600;
+    cursor: pointer;
 }
 
 a{

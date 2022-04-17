@@ -69,7 +69,11 @@ async function logout() {
 
         <div class="ava">
             <label for="pic">Pic</label>
-            <img src={avatar?avatar:$session.avatar} alt="user profile" on:click="{()=> {if(!process) process=true;avatar=randAva()}}" on:load="{()=>process=false}" title="click to change avatar">
+            <img src={avatar?avatar:$session.avatar} alt="user profile" 
+            on:click="{()=> {if(!process) process=true;avatar=randAva()}}" 
+            on:load="{()=>process=false}" title="click to change avatar"
+            width="185" height="185"
+            >
             {#if avatar}
             <span on:click="{()=>{avatar=''}}" title="click to reset avatar">❌</span>
         {/if}
@@ -79,12 +83,12 @@ async function logout() {
         <label for="nickname">Nickname</label>
         <input id="nickname" bind:value={nickname} disabled={process}>
         <label for="bio">Bio</label>
-        <textarea id="" rows="6" bind:value={bio} disabled={process}></textarea>
+        <textarea id="bio" rows="6" bind:value={bio} disabled={process}></textarea>
         <button on:click="{save}" disabled={process}>Save</button>
     </div>
     
         <hr>
-        <button on:click="{logout}" disabled={process} style="background-color: red;">Logout</button>
+        <button on:click="{logout}" disabled={process} style="background-color: #ff4f4f; color: black;">Logout</button>
     </div>
 </div>
 </Skeleton>

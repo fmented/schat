@@ -7,14 +7,15 @@ import Loading from "./Loading.svelte";
     let people:{avatar:string, nickname:string, bio:string, id:string}[]=[]
     let q = ''
     let process=false
-
+    let searched  = false
     async function search() {
         if(!q) return
         process = true
         const res = await sendRequest(API_URL.AUTH_FIND, {deviceId: q})
         if(res.ok){
             people = await res.json()
-        }        
+        }   
+        searched = true     
         process = false
     }
 </script>
@@ -28,8 +29,13 @@ import Loading from "./Loading.svelte";
     </div>
     
     <div class="s">
+        {#if !people.length && searched}
+            <p>
+                No Result
+            </p>
+        {/if}
         {#each people as person}
-        <a href="/chat/{person.id}" title="chat with {person.nickname}">
+        <a href="/chat/{person.id}" title="chat with {person.nickname}" sveltekit:prefetch>
             <ListItem img={person.avatar} text={{small:person.bio, strong:person.nickname}} />
         </a>
         {/each}
@@ -44,6 +50,7 @@ import Loading from "./Loading.svelte";
         opacity: 0;
         visibility: collapse;
     }
+
 
     a{
         text-decoration: 0;
@@ -74,5 +81,10 @@ import Loading from "./Loading.svelte";
 
     .s{
         padding: .5rem;
+        position: relative;
+    }
+
+    p{
+        text-align: center;
     }
 </style>

@@ -5,7 +5,7 @@ export default {
     display: "standalone",
     background_color: "#fff",
     description: "simple progressve semi-distributed chat app.",
-    theme_color: "#fff",
+    theme_color: "blueviolet",
     icons: [
         {
             src: "/android-chrome-192x192.png",

@@ -38,7 +38,7 @@ import SubscribtionForm from "components/SubscribtionForm.svelte";
     <SubscribtionForm on:subscribed={() => (window.location.href = "/chat")} />
       <small
       ><em
-      >before you subscribe we encourage you to read more in <a href="/about"
+      >before you subscribe we encourage you to read more in <a href="/about" sveltekit:prefetch
       >about</a
       > page.</em
       ></small
@@ -46,7 +46,7 @@ import SubscribtionForm from "components/SubscribtionForm.svelte";
     </div>
   </Skeleton>
   {:else}
-  <h1>Your browser doesn't support a few API that we need to make this app work. <a href="/about">learn more</a></h1>
+  <h1>Your browser doesn't support a few API that we need to make this app work. <a href="/about" sveltekit:prefetch>learn more</a></h1>
 {/if}
 
 <style>

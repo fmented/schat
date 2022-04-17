@@ -37,7 +37,7 @@ import Loading from '$lib/components/Loading.svelte';
     {#if conversation}
     <div class="header">
       <strong
-      ><a href="/chat" aria-label="back" >
+      ><a href="/chat" aria-label="back" sveltekit:prefetch>
         <svg
         height="30px"
         xmlns="http://www.w3.org/2000/svg"

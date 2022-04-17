@@ -13,8 +13,8 @@ const FILES = `cache${version}`;
 const to_cache = build.concat(files);
 const staticAssets = new Set(to_cache);
 
-worker.addEventListener('install', (event) => {
-	event.waitUntil(
+worker.addEventListener('install', e => {
+	e.waitUntil(
 		caches
 			.open(FILES)
 			.then((cache) => cache.addAll(to_cache))
@@ -79,7 +79,7 @@ worker.addEventListener('fetch', (event) => {
                 
             })())
         }
-        else if(event.request.url.endsWith('png')){
+        else {
             event.respondWith((async ()=>{
                 const asset = isStaticAsset && (await caches.match(event.request))
                 return asset || fetchAndCache(event.request)
@@ -92,9 +92,7 @@ worker.addEventListener('fetch', (event) => {
 const sw = self as unknown as ServiceWorkerGlobalScope
 
 let db = initDB()
-const tags = new Map()
 const s = new SWBridge(sw)
-
 
 s.on('read', async tag=>{
     const n = await sw.registration.getNotifications({tag})
@@ -153,15 +151,15 @@ s.on('message_new', async msg=>{
     }
 
     await s.emit('update', msg.from)
-    if(tags.has(msg.from)) tags.set(msg.from, tags.get(msg.from)+1)
-    else tags.set(msg.from, 1)
+    const exist = await check(msg.from)
     return await sw.registration.showNotification(msg.alias , {
             tag: msg.from, 
-            body: tags.get(msg.from)=== 1 ? msg.content: `${tags.get(msg.from)} messages`, 
+            body: !exist ? msg.content: `${exist+1} messages`, 
             icon : msg.thumbnail, 
             vibrate: [100, 200, 300, 200, 100, 200, 300],
             timestamp: msg.timeStamp,
             badge:'/favicon-32x32.png',
+            data: {total: exist? exist+1: 1},
             actions: [
                 {action:'open', title:'Open'},
                 {action:'close', title:'Close'},
@@ -172,14 +170,17 @@ s.on('message_new', async msg=>{
 
 
 function open(n:NotificationEvent['notification']) {
-    if(tags.has(n.tag)) tags.delete(n.tag)
     n.close()
     sw.clients.openWindow(`/chat/${n.tag}`)
 }
 
 function close(n:NotificationEvent['notification']) {
-    if(tags.has(n.tag)) tags.delete(n.tag)
     n.close()
+}
+
+async function check(tag:string) {
+    const n = await sw.registration.getNotifications({tag})
+    return n.length ? n[0].data.total as number : 0
 }
 
 sw.addEventListener('notificationclick', async e=>{

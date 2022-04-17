@@ -58,7 +58,7 @@ import Loading from "$lib/components/Loading.svelte";
         <div class="chat">{loading? 'Loading Data': 'No Conversation'}</div>
            {:else} 
             {#each conversation as c}
-            <a href="/chat/{c.with}/" title="chat with {c.alias}">
+            <a href="/chat/{c.with}/" title="chat with {c.alias}" sveltekit:prefetch>
                 <ListItem img={c.thumbnail} text={{strong:c.alias, small:c.content}}/>
             </a>
             {/each}

@@ -1,5 +1,5 @@
 <div>
-    <a href="/"><strong>schat</strong></a>
+    <a href="/" sveltekit:prefetch><strong>schat</strong></a>
 </div>
 
 <h1>About</h1>

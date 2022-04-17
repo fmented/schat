@@ -88,10 +88,10 @@ import Loading from "$lib/components/Loading.svelte";
       { thumb: avatar, alias: nickname }
     );
     txt = "";
+    if (conversation.length === 0) window.location.reload()
     conversation = (await db.tables.conv.findOne({ with: user })).chat;
     process = false;
   }
-
 
   let wrap: HTMLElement
   let h: number
@@ -101,13 +101,13 @@ import Loading from "$lib/components/Loading.svelte";
 </script>
 
 <svelte:head>
-		<link rel="manifest" href="/manifest.webmanifest">
+  <link rel="manifest" href="/manifest.webmanifest">
 </svelte:head>
 
 <Skeleton>
   <div class="header">
     <strong
-      ><a href="/chat" aria-label="back" title="back">
+      ><a href="/chat" aria-label="back" title="back" sveltekit:prefetch>
         <svg
           height="30px"
           xmlns="http://www.w3.org/2000/svg"
